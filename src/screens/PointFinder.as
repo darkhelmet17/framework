@@ -14,7 +14,7 @@ package screens
 	
 	public class PointFinder extends Screen
 	{
-		// 2048x2048
+		// 1280x800
 		[Embed(source="/../assets/camera_images/cam1.png")]
 		private static const SideTableR:Class; // use this to refer to the image data
 		
@@ -59,75 +59,17 @@ package screens
 			container.addChild(x);
 			container.addChild(y);
 			container.addChild(z);
-//			x.x = 25;
-//			x.y = 25;
-//			x.height = (1/3)*stage.height;
-//			x.width = (1/3)*stage.width;
-//			
-//			this.addChild(x);
-//			
-//			var y:Image = new Image(Texture.fromEmbeddedAsset(SideTableR));
-//			y.x = 
-//			y.y = 25;
-//			y.height = (1/3)*stage.height;
-//			y.width = (1/3)*stage.width;
-//			
-//			this.addChild(y);
-//			
-//			var z:Image = new Image(Texture.fromEmbeddedAsset(SideTableR));
-//			z.x = 25;
-//			z.y = 25;
-//			z.height = (1/3)*stage.height;
-//			z.width = (1/3)*stage.width;
-//			
-//			this.addChild(z);
-//			
-			//sideTable = new ImageLoader();
-			//frontTable = new ImageLoader();
-			//frontTable1 = new ImageLoader();
-			
-			
-			//The aspect ratio of an image describes the proportional relationship between its width and its height.
-			//sideTable.maintainAspectRatio = true; // this changes the images to maintain aspect ration
-			//sideTable
-			//frontTable.maintainAspectRatio = true;
-			//frontTable1.maintainAspectRatio = true;
-			
-			// Does the loading
-			//sideTable.source = Texture.fromEmbeddedAsset(SideTableR); // the name of the image data. Texture is a starling class
-			//frontTable.source = Texture.fromEmbeddedAsset(FrontTable); // the name of the image data. Texture is a starling class
-			//frontTable1.source = Texture.fromEmbeddedAsset(FrontTable1); // the name of the image data. Texture is a starling class
-		//sideTable.textureScale = 0.5;
-		//	sideTable.height = 0.6*stage.height;
-		//	sideTable.width = 0.6*stage.width;
-			//addChild(sideTable);
-			//scrollContainer.addChild(sideTable); // add to scroll container.
-			//scrollContainer.addChild(frontTable); // add to scroll container.
-			//scrollContainer.addChild(frontTable1); // add to scroll container.
-			
-//			
+	
 			instructionsText = new Label();
 			instructionsText.textRendererProperties.textFormat = new TextFormat( "Source Sans Pro", 16, 0x333333 );
 			instructionsText.textRendererProperties.embedFonts = true;
 			instructionsText.text = "Welcome to the marker selection screen. Please match the reflectors.";
 			addChild(instructionsText);
-			//scrollContainer.addChild(instructionsText);
-			
 		}
 		
 		// Here we deal with the scroll container and the layout thats being applied
 		private function buildContainer():void
 		{
-//			verticalLayout = new VerticalLayout(); 
-//			verticalLayout.verticalAlign = VerticalLayout.VERTICAL_ALIGN_TOP;
-//			verticalLayout.horizontalAlign = VerticalLayout.HORIZONTAL_ALIGN_CENTER;
-//			verticalLayout.gap = 25; // defines space between child items. 
-			
-//			horizontalLayout = new HorizontalLayout();
-//			horizontalLayout.horizontalAlign = HorizontalLayout.HORIZONTAL_ALIGN_CENTER; 
-//			horizontalLayout.verticalAlign = HorizontalLayout.VERTICAL_ALIGN_TOP;
-//			horizontalLayout.gap = 25; 
-//			addChild(horizontalLayout); 
 			
 			layout = new HorizontalLayout();
 			layout.paddingTop = 10;
@@ -146,29 +88,13 @@ package screens
 			container.height = this.stage.stageHeight - 300;
 			
 			addChild(container);
-			
-//			scrollContainer = new ScrollContainer();
-//			scrollContainer.layout = verticalLayout; 	
-//			scrollContainer.width = this.stage.stageWidth;	
-//			scrollContainer.height = this.stage.stageHeight;
-//			addChild(scrollContainer); // add to the screen class
 		}		
 		
 		
 		// method of screen class, made to be overwritten. 
 		// position and size things accurately.
 		override protected function draw():void{
-//			sideTable.validate(); // enforce current numbers to use them
-//			sideTable.width = actualWidth; // actualWidth is a property of the feathers screen class 
-//			sideTable.width =  actualWidth;
-			
-			//frontTable.validate(); // enforce current numbers to use them
-			//frontTable.width = actualWidth; // actualWidth is a property of the feathers screen class 
-			//frontTable.width =  actualWidth;
-			
-			//frontTable1.validate(); // enforce current numbers to use them
-			//frontTable1.width = actualWidth; // actualWidth is a property of the feathers screen class 
-			//frontTable1.width =  actualWidth;
+
 		}
 	}
 }

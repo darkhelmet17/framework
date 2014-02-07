@@ -1,7 +1,5 @@
 package star
 {
-	import feathers.controls.Button;
-	import feathers.controls.Screen;
 	import feathers.controls.ScreenNavigator;
 	import feathers.controls.ScreenNavigatorItem;
 	import feathers.controls.TabBar;
@@ -9,7 +7,7 @@ package star
 	import feathers.motion.transitions.ScreenFadeTransitionManager;
 	import feathers.themes.MetalWorksMobileTheme;
 	
-	import screens.BrowseScreen;
+	import screens.CameraScreen;
 	import screens.HomeScreen;
 	import screens.PointFinder;
 	
@@ -21,13 +19,15 @@ package star
 		private var screenNavigator:ScreenNavigator;
 		private var screenTransitionManager:ScreenFadeTransitionManager; // allow nice fades between screens. 
 		private var navigationBar:TabBar; 
+		
+		
 		// nav height - keep take of navigation bar height. 
 		// adjust other components to take this height into consideration.
 		private var navHeight:int;
 		
-		private static const HOME_SCREEN:String = "homeScreen"; 
-		private static const BROWSE_SCREEN:String = "browseScreen"; 
-		private static const POINTFINDER_SCREEN:String = "pointFinder"; 
+		private static const HOME_SCREEN:String = "Home"; 
+		private static const BROWSE_SCREEN:String = "Cameras"; 
+		private static const POINTFINDER_SCREEN:String = "Reflector Finder"; 
 		
 		
 		
@@ -43,23 +43,35 @@ package star
 		
 		private function onStageReady():void
 		{
-			new MetalWorksMobileTheme(); // all we need to do to implement the metalworks theme
+			
+			// all we need to do to implement the metalworks theme
+			new MetalWorksMobileTheme(); 
 			buildLayout();
+			
+			
 			// take care of setting up all the screens and putting them in the screen navigator 
 			setupScreens(); 
-			completeLayout(); // wrap everything up.
+			
+			// wrap everything up
+			completeLayout();
 		}
 		
 		private function completeLayout():void
 		{
 			// set nav height 
 			// need to validate
-			navigationBar.validate(); // force the component to report its position
-			navHeight = Math.round(navigationBar.height); // could not be a whole number 
+			// force the component to report its position
+			navigationBar.validate(); 
+			
+			// could not be a whole number 
+			navHeight = Math.round(navigationBar.height); 
+			
 			//adjust position and size of our screen navigator component to take into account the nav bar height
 			screenNavigator.y = navHeight;
 			screenNavigator.width = stage.stageWidth;
 			screenNavigator.height = stage.stageHeight-navHeight;
+			
+			// add to sprite
 			addChild(screenNavigator);
 		}
 		
@@ -71,12 +83,13 @@ package star
 			navigationBar = new TabBar();
 			navigationBar.dataProvider = new ListCollection([
 				{label:"Home", data:HOME_SCREEN},
-				{label:"Picture Studio" , data:BROWSE_SCREEN},
-				{label:"Reflector Association Process" , data:POINTFINDER_SCREEN},
+				{label:"Cameras" , data:BROWSE_SCREEN},
+				{label:"Reflector Finder" , data:POINTFINDER_SCREEN},
 				{label:"3-D Display", data:BROWSE_SCREEN},
 			]);
 			
-			navigationBar.selectedIndex  = 1; // loads homescreens
+			// loads homescreens
+			navigationBar.selectedIndex  = 1;
 			navigationBar.addEventListener(Event.CHANGE, navigationBarChanged);
 			
 			// make the bar expand across the entire stage. 
@@ -90,7 +103,6 @@ package star
 		private function navigationBarChanged(event:Event):void
 		{
 			// instruct our screen navigator to show a particular screen
-			
 			// we are passing in the selectedItem.data ATTRIBUTE from the navigation bar
 			screenNavigator.showScreen(navigationBar.selectedItem.data);
 			
@@ -100,8 +112,9 @@ package star
 		{
 			screenNavigator = new ScreenNavigator();
 			screenNavigator.addScreen(HOME_SCREEN, new ScreenNavigatorItem(HomeScreen));
-			screenNavigator.addScreen(BROWSE_SCREEN, new ScreenNavigatorItem(BrowseScreen));
+			screenNavigator.addScreen(BROWSE_SCREEN, new ScreenNavigatorItem(CameraScreen));
 			screenNavigator.addScreen(POINTFINDER_SCREEN, new ScreenNavigatorItem(PointFinder));
+			
 			// Full control over which screen is being displayed. 
 			screenTransitionManager = new ScreenFadeTransitionManager(screenNavigator);
 		}
