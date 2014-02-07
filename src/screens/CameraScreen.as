@@ -15,13 +15,9 @@ package screens
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.List;
 	import feathers.controls.Screen;
-	import feathers.controls.ScrollContainer;
-	import feathers.controls.Scroller;
-	import feathers.data.ListCollection;
 	import feathers.layout.HorizontalLayout;
 	
 	import starling.display.Image;
-	
 	
 	
 	public class CameraScreen extends Screen 
@@ -76,8 +72,7 @@ package screens
 		private var save_file:File;
 		
 		// Feathers object
-		private var scrollContainer:ScrollContainer;
-		private var layout:LayoutGroup;
+		private var image_layout:LayoutGroup;
 		
 		// Horizontal layout for container
 		private var horizontalLayout:HorizontalLayout;
@@ -90,7 +85,6 @@ package screens
 		
 		// List of images
 		private var imagesList:List;
-		
 
 		override protected function initialize():void{
 			
@@ -123,7 +117,6 @@ package screens
 			// initialize the container and controls
 			buildContainer();
 			buildControls();
-			//loadImages();
 			
 			// create event listeners
 			loader_cam_1.contentLoaderInfo.addEventListener(Event.COMPLETE, cam_1_load_complete);
@@ -151,107 +144,55 @@ package screens
 		
 		private function cam_1_load_complete(event:Event):void {
 			// load image bitmap data into bitmap
-			if (layout.contains(image_cam_1))
-				layout.removeChild(image_cam_1);
+			if (image_layout.contains(image_cam_1))
+				image_layout.removeChild(image_cam_1);
 			
 			bitmap.bitmapData = event.target.content.bitmapData;
 			
 			image_cam_1 = Image.fromBitmap(bitmap);
-			image_cam_1.height = layout.height / 2.4;
-			image_cam_1.width = layout.width / 2.4;
+			image_cam_1.height = image_layout.height / 2.4;
+			image_cam_1.width = image_layout.width / 2.4;
 			
 			image_cam_1.x = 72;
 			image_cam_1.y = 5;
 			
-			layout.addChild(image_cam_1);
+			image_layout.addChild(image_cam_1);
 		}
 		
 		private function cam_2_load_complete(event:Event):void {
 			// load image bitmap data into bitmap
-			layout.removeChild(image_cam_2);
+			image_layout.removeChild(image_cam_2);
 			
 			bitmap.bitmapData = event.target.content.bitmapData;
 			
 			image_cam_2 = Image.fromBitmap(bitmap);
-			image_cam_2.height = layout.height / 2.4;
-			image_cam_2.width = layout.width / 2.4;
+			image_cam_2.height = image_layout.height / 2.4;
+			image_cam_2.width = image_layout.width / 2.4;
 			
-			image_cam_2.x = layout.width/2.4 + 78;
+			image_cam_2.x = image_layout.width/2.4 + 78;
 			image_cam_2.y = 5;
 			
-			layout.addChild(image_cam_2);
+			image_layout.addChild(image_cam_2);
 		}
 		
 		private function cam_3_load_complete(event:Event):void {
 			// load image bitmap data into bitmap
-			layout.removeChild(image_cam_3);
+			image_layout.removeChild(image_cam_3);
 			
 			bitmap.bitmapData = event.target.content.bitmapData;
 			
 			image_cam_3 = Image.fromBitmap(bitmap);
-			image_cam_3.height = layout.height / 2.4;
-			image_cam_3.width = layout.width / 2.4;
+			image_cam_3.height = image_layout.height / 2.4;
+			image_cam_3.width = image_layout.width / 2.4;
 			
 			image_cam_3.x = 72;
-			image_cam_3.y = layout.height / 2.4 + 10;
+			image_cam_3.y = image_layout.height / 2.4 + 10;
 			
-			layout.addChild(image_cam_3);
-		}
-		
-		private function loadImages():void
-		{
-			//var listCollection:ListCollection = new ListCollection();
-			// Step 1- declare file, represents a directy. but can represent both files and folders. 
-			// The path "photos" corresponds to the directory path where we are saving any photos.
-			var imagesDirectory:File = File.documentsDirectory.resolvePath("/../../assets/camera_images");
-			var imagesArray:Array = new Array();//imagesDirectory.getDirectoryListing();
-			var listCollection:ListCollection = new ListCollection();
-			
-			/*
-//			// Step 2 - If a directory does exist do this stuff. 
-			if(imagesDirectory.exists){ // this if statement checks to see if the directory actually exist. 
-				imagesArray = imagesDirectory.getDirectoryListing();
-				//var listCollection:ListCollection = new ListCollection();
-				
-				for (var i:int = 0; i < imagesArray.length; i++){
-					if (imagesArray[i].extension == "jpg" || imagesArray[i].extension == "png"){
-						// define each object with 2 properties, Tile-name of file and Image-url property(points to location to file)
-						listCollection.push({title:imagesArray[i].name, image:imagesArray[i].url})	
-					}
-				}
-			}*/
-			
-			imagesArray.push(image_cam_1);
-			for (var i:int = 0; i < imagesArray.length; i++) {
-				listCollection.push({title:imagesArray[i].name, image:imagesArray[i].url});
-			}
-
-//			
-			if(listCollection.length == 0){
-				showMessage();
-			}else{
-				imagesList.dataProvider = listCollection;
-				imagesList.itemRendererProperties.labelField = "title";
-				scrollContainer.addChild(imagesList);
-			}
-		}
-		
-		private function showMessage():void
-		{
-			scrollContainer.removeChildren(); // removes everything
-			scrollContainer.addChild(noImagesText);
+			image_layout.addChild(image_cam_3);
 		}
 		
 		private function buildControls():void
 		{
-			imageLoader = new ImageLoader();
-			scrollContainer.addChild(imageLoader); // pass in image loader
-			
-			noImagesText = new Label();
-			noImagesText.text = "No images yet!";
-			
-			imagesList = new List();
-			scrollContainer.addChild(imagesList); 
 
 		}
 		
@@ -264,18 +205,12 @@ package screens
 			horizontalLayout.gap = 25;
 			horizontalLayout.padding = 25;
 			
-			// create the container 
-			scrollContainer = new ScrollContainer();
-			scrollContainer.layout = horizontalLayout; 	
-			scrollContainer.width = this.stage.stageWidth;	
-			scrollContainer.height = this.stage.stageHeight;
-			
-			layout = new LayoutGroup();
-			layout.width = this.stage.stageWidth;
-			layout.height = this.stage.stageHeight;
+			image_layout = new LayoutGroup();
+			image_layout.width = this.stage.stageWidth;
+			image_layout.height = this.stage.stageHeight;
 			
 			// add to the screen class
-			addChild(layout);
+			addChild(image_layout);
 		}
 		
 		// Used for reposition, resize components. invoked anytime its necessary to invoke. 

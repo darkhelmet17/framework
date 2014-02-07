@@ -15,13 +15,13 @@ package screens
 	public class PointFinder extends Screen
 	{
 		// 1280x800
-		[Embed(source="/../assets/camera_images/cam1.png")]
+		[Embed(source="/../assets/camera images/cam1.png")]
 		private static const SideTableR:Class; // use this to refer to the image data
 		
-		[Embed(source="/../assets/camera_images/cam2.png")]
+		[Embed(source="/../assets/camera images/cam2.png")]
 		private static const FrontTableR:Class; // use this to refer to the image data
 		
-		[Embed(source="/../assets/camera_images/cam2.png")]
+		[Embed(source="/../assets/camera images/cam2.png")]
 		private static const FrontTable1R:Class; // use this to refer to the image data
 		
 		// feathers display container stuff
