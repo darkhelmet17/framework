@@ -26,7 +26,7 @@ package star
 		private var navHeight:int;
 		
 		private static const HOME_SCREEN:String = "Home"; 
-		private static const BROWSE_SCREEN:String = "Cameras"; 
+		private static const CAMERA_SCREEN:String = "Cameras"; 
 		private static const POINTFINDER_SCREEN:String = "Reflector Finder"; 
 		
 		
@@ -83,9 +83,9 @@ package star
 			navigationBar = new TabBar();
 			navigationBar.dataProvider = new ListCollection([
 				{label:"Home", data:HOME_SCREEN},
-				{label:"Cameras" , data:BROWSE_SCREEN},
+				{label:"Cameras" , data:CAMERA_SCREEN},
 				{label:"Reflector Finder" , data:POINTFINDER_SCREEN},
-				{label:"3-D Display", data:BROWSE_SCREEN},
+				{label:"3-D Display", data:HOME_SCREEN},
 			]);
 			
 			// loads homescreens
@@ -112,7 +112,7 @@ package star
 		{
 			screenNavigator = new ScreenNavigator();
 			screenNavigator.addScreen(HOME_SCREEN, new ScreenNavigatorItem(HomeScreen));
-			screenNavigator.addScreen(BROWSE_SCREEN, new ScreenNavigatorItem(CameraScreen));
+			screenNavigator.addScreen(CAMERA_SCREEN, new ScreenNavigatorItem(CameraScreen));
 			screenNavigator.addScreen(POINTFINDER_SCREEN, new ScreenNavigatorItem(PointFinder));
 			
 			// Full control over which screen is being displayed. 

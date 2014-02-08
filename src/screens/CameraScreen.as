@@ -1,5 +1,6 @@
 package screens
 {
+	// import flash components
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
@@ -10,13 +11,14 @@ package screens
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
+	// import feathers components
 	import feathers.controls.ImageLoader;
 	import feathers.controls.Label;
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.List;
 	import feathers.controls.Screen;
-	import feathers.layout.HorizontalLayout;
 	
+	// import starling components
 	import starling.display.Image;
 	
 	
@@ -74,9 +76,6 @@ package screens
 		// Feathers object
 		private var image_layout:LayoutGroup;
 		
-		// Horizontal layout for container
-		private var horizontalLayout:HorizontalLayout;
-		
 		// Load in image loader
 		private var imageLoader:ImageLoader;
 		
@@ -86,7 +85,11 @@ package screens
 		// List of images
 		private var imagesList:List;
 
-		override protected function initialize():void{
+		/**
+		 * Constructor:
+		 * Initializes all variables and adds event listeners
+		 */
+		public function CameraScreen():void{
 			
 			// initialize Bitmap object
 			bitmap = new Bitmap();
@@ -114,117 +117,140 @@ package screens
 			// initialize filestream used to save files
 			file_stream = new FileStream();
 			
-			// initialize the container and controls
-			buildContainer();
-			buildControls();
+			// create the layout used for the images
+			image_layout = new LayoutGroup();
 			
 			// create event listeners
 			loader_cam_1.contentLoaderInfo.addEventListener(Event.COMPLETE, cam_1_load_complete);
 			loader_cam_2.contentLoaderInfo.addEventListener(Event.COMPLETE, cam_2_load_complete);
 			loader_cam_3.contentLoaderInfo.addEventListener(Event.COMPLETE, cam_3_load_complete);
 			timer.addEventListener(TimerEvent.TIMER, refreshImages);
+		}
+		
+		/**
+		 * Override of dispose function to stop the timer when screen is no longer active,
+		 * otherwise weird things start happening
+		 */
+		override public function dispose():void {
+			timer.stop();
+			super.dispose();
+		}
+		
+		/**
+		 * Override of the initialize function to build the image container and start the timer
+		 * when the screen is active
+		 */
+		override protected function initialize():void{
+			
+			// set the size of the image layout
+			image_layout.width = this.stage.stageWidth;
+			image_layout.height = this.stage.stageHeight;
+			
+			// add the image layout to the screen
+			addChild(image_layout);
 			
 			// start the timer
 			timer.start();
 		}
 		
+		/**
+		 * Refresh each of the camera images once the timer completes 1 tick
+		 */
 		private function refreshImages(event:Event):void {
 			
+			// set the URL for the first camera and load the image
 			request_cam_1.url = CAM_1_IMAGE_URL;
 			loader_cam_1.load(request_cam_1);
 			
-			
+			// set the URL for the second camera and load the image
 			request_cam_2.url = CAM_2_IMAGE_URL;
 			loader_cam_2.load(request_cam_2);
 			
-			
-			request_cam_3.url = CAM_2_IMAGE_URL;
+			// set the URL for the third camera and load the image
+			// TODO: Change from CAM_2_IMAGE_URL to CAM_3_IMAGE_URL when 3rd camera is available
+			request_cam_3.url = CAM_2_IMAGE_URL; 
 			loader_cam_3.load(request_cam_3);
 		}
 		
+		/**
+		 * Displays the image from Camera 1 once the image is loaded
+		 */
 		private function cam_1_load_complete(event:Event):void {
-			// load image bitmap data into bitmap
+			
+			// if the image is in the layout, remove it first
 			if (image_layout.contains(image_cam_1))
 				image_layout.removeChild(image_cam_1);
 			
+			// get the bitmapData of the loaded image
 			bitmap.bitmapData = event.target.content.bitmapData;
 			
+			// load the bitmapData into an Image object
 			image_cam_1 = Image.fromBitmap(bitmap);
+			
+			// set the height and width of the image
 			image_cam_1.height = image_layout.height / 2.4;
 			image_cam_1.width = image_layout.width / 2.4;
 			
+			// set the coordinates of the image
 			image_cam_1.x = 72;
 			image_cam_1.y = 5;
 			
+			// add the image to the layout
 			image_layout.addChild(image_cam_1);
 		}
 		
+		/**
+		 * Displays the image from Camera 2 once the image is loaded
+		 */
 		private function cam_2_load_complete(event:Event):void {
-			// load image bitmap data into bitmap
-			image_layout.removeChild(image_cam_2);
 			
+			// if the image is in the layout, remove it first
+			if (image_layout.contains(image_cam_2))
+				image_layout.removeChild(image_cam_2);
+			
+			// get the bitmapData of the loaded image
 			bitmap.bitmapData = event.target.content.bitmapData;
 			
+			// load the bitmapData into an Image object
 			image_cam_2 = Image.fromBitmap(bitmap);
+			
+			// set the height and width of the image
 			image_cam_2.height = image_layout.height / 2.4;
 			image_cam_2.width = image_layout.width / 2.4;
 			
+			// set the coordinates of the image
 			image_cam_2.x = image_layout.width/2.4 + 78;
 			image_cam_2.y = 5;
 			
+			// add the image to the layout
 			image_layout.addChild(image_cam_2);
 		}
 		
+		/**
+		 * Displays the image from Camera 3 once the image is loaded
+		 */
 		private function cam_3_load_complete(event:Event):void {
-			// load image bitmap data into bitmap
-			image_layout.removeChild(image_cam_3);
 			
+			// if the image is in the layout, remove it first
+			if (image_layout.contains(image_cam_3))
+				image_layout.removeChild(image_cam_3);
+			
+			// get the bitmapData of the loaded image
 			bitmap.bitmapData = event.target.content.bitmapData;
 			
+			// load the bitmapData into an Image object
 			image_cam_3 = Image.fromBitmap(bitmap);
+			
+			// set the height and width of the image
 			image_cam_3.height = image_layout.height / 2.4;
 			image_cam_3.width = image_layout.width / 2.4;
 			
+			// set the coordinates of the image
 			image_cam_3.x = 72;
 			image_cam_3.y = image_layout.height / 2.4 + 10;
 			
+			// add the image to the layout
 			image_layout.addChild(image_cam_3);
 		}
-		
-		private function buildControls():void
-		{
-
-		}
-		
-		private function buildContainer():void
-		{
-			// create the layout
-			horizontalLayout = new HorizontalLayout();
-			horizontalLayout.verticalAlign = HorizontalLayout.VERTICAL_ALIGN_TOP;
-			horizontalLayout.horizontalAlign = HorizontalLayout.HORIZONTAL_ALIGN_LEFT;
-			horizontalLayout.gap = 25;
-			horizontalLayout.padding = 25;
-			
-			image_layout = new LayoutGroup();
-			image_layout.width = this.stage.stageWidth;
-			image_layout.height = this.stage.stageHeight;
-			
-			// add to the screen class
-			addChild(image_layout);
-		}
-		
-		// Used for reposition, resize components. invoked anytime its necessary to invoke. 
-		override protected function draw():void{
-			var canvasDimension:int = this.actualWidth - (horizontalLayout.padding*2);
-			imageLoader.width = canvasDimension;
-			imageLoader.height = canvasDimension; 
-			
-			// gives us the proper height for images list
-			imagesList.height = actualHeight - actualWidth - horizontalLayout.padding; 
-			imagesList.width = canvasDimension;
-		}
-		
-		
-		
 	}
 }
