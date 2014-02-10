@@ -3,6 +3,7 @@ package screens
 	// import image encoder
 	import com.adobe.images.PNGEncoder;
 	
+	// import flash packages
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
@@ -15,10 +16,12 @@ package screens
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
+	// import feathers packages
 	import feathers.controls.Button;
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.Screen;
 	
+	// import starling packages
 	import starling.display.Image;
 	import starling.events.Event;
 	
