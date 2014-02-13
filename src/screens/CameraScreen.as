@@ -263,12 +263,12 @@ package screens
 			image_cam_1 = Image.fromBitmap(bitmap_cam_1);
 			
 			// set the height and width of the image
-			image_cam_1.height = image_layout.height / SCALER;
+			image_cam_1.height = (image_layout.height / SCALER) + 20;
 			image_cam_1.width = image_layout.width / SCALER;
 			
 			// set the coordinates of the image
 			image_cam_1.x = 72;
-			image_cam_1.y = 5;
+			image_cam_1.y = 0;
 			
 			// add the image to the layout
 			image_layout.addChild(image_cam_1);
@@ -291,12 +291,12 @@ package screens
 			image_cam_2 = Image.fromBitmap(bitmap_cam_2);
 			
 			// set the height and width of the image
-			image_cam_2.height = image_layout.height / SCALER;
+			image_cam_2.height = (image_layout.height / SCALER) + 20;
 			image_cam_2.width = image_layout.width / SCALER;
 			
 			// set the coordinates of the image
 			image_cam_2.x = image_layout.width/SCALER + 78;
-			image_cam_2.y = 5;
+			image_cam_2.y = 0;
 			
 			// add the image to the layout
 			image_layout.addChild(image_cam_2);
@@ -319,12 +319,12 @@ package screens
 			image_cam_3 = Image.fromBitmap(bitmap_cam_3);
 			
 			// set the height and width of the image
-			image_cam_3.height = image_layout.height / SCALER;
+			image_cam_3.height = (image_layout.height / SCALER) + 20;
 			image_cam_3.width = image_layout.width / SCALER;
 			
 			// set the coordinates of the image
 			image_cam_3.x = 72;
-			image_cam_3.y = image_layout.height / SCALER + 10;
+			image_cam_3.y = image_layout.height / SCALER + 25;
 			
 			// add the image to the layout
 			image_layout.addChild(image_cam_3);
@@ -362,8 +362,7 @@ package screens
 			} catch (e:Error){}
 			
 			// set the URL for the third camera and load the image
-			// TODO: Change from CAM_2_IMAGE_URL to CAM_3_IMAGE_URL when 3rd camera is available
-			request_cam_3.url = CAM_2_IMAGE_URL; 
+			request_cam_3.url = CAM_3_IMAGE_URL; 
 			try {
 				// placed in try/catch block in case camera is not connected or something else goes wrong
 				loader_cam_3.load(request_cam_3);
