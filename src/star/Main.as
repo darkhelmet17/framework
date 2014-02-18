@@ -14,6 +14,7 @@ package star
 	import screens.CameraScreen;
 	import screens.HomeScreen;
 	import screens.PointFinder;
+	import screens.PointFinder2;
 	
 	import starling.display.Sprite;
 	import starling.events.Event;
