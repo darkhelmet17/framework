@@ -1,9 +1,6 @@
 package star
 {
-	import flash.display.Bitmap;
-	
-	import feathers.controls.Button;
-	import feathers.controls.Screen;
+
 	import feathers.controls.ScreenNavigator;
 	import feathers.controls.ScreenNavigatorItem;
 	import feathers.controls.TabBar;
@@ -14,7 +11,7 @@ package star
 	import screens.CameraScreen;
 	import screens.HomeScreen;
 	import screens.PointFinder;
-	import screens.PointFinder2;
+	import screens.DisplayScreen;
 	
 	import starling.display.Sprite;
 	import starling.events.Event;
@@ -30,7 +27,8 @@ package star
 		
 		private static const HOME_SCREEN:String = "homeScreen"; 
 		private static const BROWSE_SCREEN:String = "browseScreen"; 
-		private static const POINTFINDER_SCREEN:String = "pointFinder"; 
+		private static const POINTFINDER_SCREEN:String = "pointFinder";
+		private static const DISPLAY_SCREEN:String = "displayScreen";
 		
 		
 		
@@ -77,7 +75,7 @@ package star
 				{label:"Home", data:HOME_SCREEN},
 				{label:"Camera Feeds" , data:BROWSE_SCREEN},
 				{label:"Reflector Association Process" , data:POINTFINDER_SCREEN},
-				{label:"3-D Display", data:BROWSE_SCREEN},
+				{label:"3-D Display", data:DISPLAY_SCREEN},
 			]);
 			
 			navigationBar.selectedIndex  = 2; // loads homescreens
@@ -106,6 +104,7 @@ package star
 			screenNavigator.addScreen(HOME_SCREEN, new ScreenNavigatorItem(HomeScreen));
 			screenNavigator.addScreen(BROWSE_SCREEN, new ScreenNavigatorItem(CameraScreen));
 			screenNavigator.addScreen(POINTFINDER_SCREEN, new ScreenNavigatorItem(PointFinder));
+			screenNavigator.addScreen(DISPLAY_SCREEN, new ScreenNavigatorItem(DisplayScreen));
 			
 			// Full control over which screen is being displayed. 
 			screenTransitionManager = new ScreenFadeTransitionManager(screenNavigator);
