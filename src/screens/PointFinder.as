@@ -34,19 +34,6 @@ package screens
 		private const GREEN:uint = 0x00ff00;
 		private const BLUE:uint = 0x0000ff;
 		
-		private var textField:TextField;
-		private var distance_away:Number = 1.5494; // in meters
-		private var distance:Number = 0.5; // in meters
-		
-		// Reflector center-point variables
-		private var left_shoulder:Point;
-		private var right_shoulder:Point;
-		private var left_hip:Point;
-		private var right_hip:Point;
-		
-		// variable for keeping track of which reflector state we are in
-		private var state:Number;
-		
 		// brightness threshold
 		private const BRIGHTNESS_THRESHOLD:uint = 3400000;
 		
@@ -60,7 +47,11 @@ package screens
 		// thumbbnail design specs
 		private const thumbNailSize:int = 200;
 		
+		// width-to-height ratio of images
 		private const ASPECT_RATIO:Number = 8/5;
+		
+		// Path to where the images are
+		private const IMAGE_PATH:String = "C:/camera images/New folder/"; 
 		
 		  ///////////////////////////
 		 //// Regular Variables ////
@@ -69,8 +60,6 @@ package screens
 		// Arrays to hold pictures
 		private var imageArray:Array;
 		private var thumbnailArray:Array;
-		
-		private var scale:Number;
 		
 		// Keep track of side scroll
 		private var touchBeginX:int;
@@ -88,9 +77,22 @@ package screens
 		private var thumbnailContainer:ScrollContainer;
 		private var layout:VerticalLayout;
 		
-		// Path to where the images are
-		private const IMAGE_PATH:String = "C:/camera images/New folder/"; 
+		// text field to display instructions to user
+		private var textField:TextField;
 		
+		// hard-coded variables for pixel resolution
+		private var distance_away:Number = 1.5494; // in meters
+		private var distance:Number = 0.5; // in meters
+		
+		// Reflector center-point variables
+		private var left_shoulder:Point;
+		private var right_shoulder:Point;
+		private var left_hip:Point;
+		private var right_hip:Point;
+		private var complete:Boolean;
+		
+		// variable for keeping track of which reflector state we are in
+		private var state:Number;
 		
 		  ///////////////////////
 		 //     Functions     //
@@ -116,6 +118,9 @@ package screens
 			// set initial state
 			state = 0;
 			
+			// 
+			complete = false;
+			
 			// Initilize arrays
 			imageArray = new Array();
 			thumbnailArray = new Array();
@@ -124,6 +129,7 @@ package screens
 			textField = new TextField(220, 100, "Click on the left shoulder reflector");
 			textField.x = 0;
 			textField.y = 500;
+			textField.color = 0xffffff;
 			
 			// Add the mouse click event
 			this.addEventListener(TouchEvent.TOUCH, onTouch);
@@ -276,8 +282,10 @@ package screens
 			// create center image
 			mainImageContainer.x = thumbnailContainer.width; 
 			mainImageContainer.y = 0;
-			mainImageContainer.height = stage.stageHeight - 24;
-			mainImageContainer.width = ASPECT_RATIO * mainImageContainer.height;
+			
+			// scale container to fit the screen
+			mainImageContainer.width = stage.stageWidth - 220;
+			mainImageContainer.height = (1/ASPECT_RATIO) * mainImageContainer.width;
 			
 			// add components to page
 			addChild(thumbnailContainer);
@@ -485,7 +493,7 @@ package screens
 			mainImage = imageArray[index];
 			
 			// Update thumbbnail
-			thumbnailArray[index].source = Texture.fromBitmapData(bmd);
+			//thumbnailArray[index].source = Texture.fromBitmapData(bmd);
 		}
 		
 		
@@ -533,7 +541,7 @@ package screens
 						// set the coordinates
 						right_hip.x = x;
 						right_hip.y = y;
-						
+						complete = true;
 						// draw a line now that we have two points in common
 						drawLine(left_hip, right_hip);
 						break;
@@ -563,6 +571,17 @@ package screens
 				line.graphics.moveTo(p1.x, p1.y);
 				line.graphics.lineTo(p2.x, p2.y);
 				bmd.draw(line);
+				
+				if(complete) {
+					var center:Sprite = new Sprite();
+					center.graphics.clear();
+					center.graphics.beginFill(BLUE, 1.0);
+					center.graphics.lineStyle(3, BLUE);
+					center.graphics.moveTo( (right_shoulder.x + left_shoulder.x)/2, (right_shoulder.y + left_shoulder.y)/2);
+					center.graphics.lineTo( (right_hip.x + left_hip.x)/2, (right_hip.y + left_hip.y)/2);
+					bmd.draw(center);
+					complete = false;
+				}
 			}
 		}
 		
