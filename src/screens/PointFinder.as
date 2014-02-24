@@ -23,8 +23,7 @@ package screens
 	import starling.text.TextField;
 	import starling.textures.Texture;
 	
-	public class PointFinder extends Screen
-	{
+	public class PointFinder extends Screen {
 		
 		  ////////////////////////////
 		 ////      Constants    /////
@@ -39,9 +38,14 @@ package screens
 		private var distance_away:Number = 1.5494; // in meters
 		private var distance:Number = 0.5; // in meters
 		
-		private var clicked:Boolean;
-		private var point1:Point;
-		private var point2:Point;
+		// Reflector center-point variables
+		private var left_shoulder:Point;
+		private var right_shoulder:Point;
+		private var left_hip:Point;
+		private var right_hip:Point;
+		
+		// variable for keeping track of which reflector state we are in
+		private var state:Number;
 		
 		// brightness threshold
 		private const BRIGHTNESS_THRESHOLD:uint = 3400000;
@@ -85,7 +89,13 @@ package screens
 		private var layout:VerticalLayout;
 		
 		// Path to where the images are
-		private const IMAGE_PATH:String = "C:/camera images/"; 
+		private const IMAGE_PATH:String = "C:/camera images/New folder/"; 
+		
+		
+		  ///////////////////////
+		 //     Functions     //
+		///////////////////////
+		
 		
 		/**
 		 * Constructor
@@ -97,12 +107,21 @@ package screens
 			thumbnailContainer = new ScrollContainer();
 			mainImageContainer = new LayoutGroup();
 			
+			// initialize reflector point variables
+			left_shoulder = new Point();
+			right_shoulder = new Point();
+			left_hip = new Point();
+			right_hip = new Point();
+			
+			// set initial state
+			state = 0;
+			
 			// Initilize arrays
 			imageArray = new Array();
 			thumbnailArray = new Array();
 			
 			// create textField
-			textField = new TextField(220, 100, "Approx. resolution: ");
+			textField = new TextField(220, 100, "Click on the left shoulder reflector");
 			textField.x = 0;
 			textField.y = 500;
 			
@@ -114,7 +133,7 @@ package screens
 		/**
 		 * Override of initialize() function used to set up containers on the screen
 		 */
-		override protected function initialize():void{
+		override protected function initialize():void {
 			
 			// Initilze the containers which hold the pictures
 			buildContainers(); 
@@ -133,15 +152,12 @@ package screens
 		/**
 		 * Event handler to determine which actions to take when the screen is clicked on
 		 */
-		private function onTouch(event:TouchEvent):void
-		{
+		private function onTouch(event:TouchEvent):void {
 			var t:Touch = event.getTouch(this);
 			
 			// make sure the event actually happened
-			if(t)
-			{
-				switch(t.phase)
-				{	
+			if(t) {
+				switch(t.phase) {	
 					// Equal to mouse down
 					case TouchPhase.BEGAN:
 						touchBeginX = t.globalX;
@@ -152,39 +168,51 @@ package screens
 					case TouchPhase.ENDED:
 						
 						// If the mouse moved < 10 then do not change the picture AKA user was scrolling the container
-						if(Math.abs(t.globalX - touchBeginX) < 10)
-						{
-							if(Math.abs(t.globalY - touchBeginY) < 10)
-							{
+						if(Math.abs(t.globalX - touchBeginX) < 10) {
+							if(Math.abs(t.globalY - touchBeginY) < 10) {
 								trace("Target Name " + t.target.name);
 								
 								// user clicked main image
-								if(t.target.name == "mainImage")
-								{
+								if(t.target.name == "mainImage") {
 									trace("human assist called");
 									humanAssist(t);
 								}	
 								
 								// user clicked 1st thumbnail
-								else if(t.target.name == "thumbnail0")
-								{
+								else if(t.target.name == "thumbnail0") {
 									mainImage = imageArray[0];
+									
+									// reset the state
+									state = 0;
+									
+									// set the array index
 									index = 0;
 								}
 								
 								// user clicked 2nd thumbnail
-								else if(t.target.name == "thumbnail1")
-								{
+								else if(t.target.name == "thumbnail1") {
 									mainImage = imageArray[1];
+									
+									// reset the state
+									state = 0;
+									
+									// set the array index
 									index = 1;
 								}
 								
 								// user clicked 3rd thumbnail
-								else if(t.target.name == "thumbnail2")
-								{
+								else if(t.target.name == "thumbnail2") {
 									mainImage = imageArray[2];
+									
+									// reset the state
+									state = 0;
+									
+									// set the array index
 									index = 2;
 								}
+								
+								// update the instructions to the user
+								updateInstructions();
 								
 								// set correct sizes of the image
 								mainImage.maintainAspectRatio = false;
@@ -200,16 +228,15 @@ package screens
 			}
 		}
 		
+		
 		/**
 		 * Loads each picture into a sized down thumbbnail version of it into the scrolling container
 		 */ 
-		private function initThumbbnails():void
-		{
+		private function initThumbbnails():void {
 			var temp:ImageLoader;
 			
 			// add each image to the thumbnail container
-			for(var i:int = 0; i < imageArray.length; i++)	
-			{
+			for(var i:int = 0; i < imageArray.length; i++) {
 				// get the image
 				temp = thumbnailArray[i];
 				
@@ -226,8 +253,11 @@ package screens
 			}
 		}
 		
-		private function buildContainers():void
-		{	
+		
+		/**
+		 * Function to build the display containers for the screen
+		 */
+		private function buildContainers():void {	
 			// create the layout
 			layout.horizontalAlign = VerticalLayout.HORIZONTAL_ALIGN_CENTER
 			layout.verticalAlign = HorizontalLayout.VERTICAL_ALIGN_MIDDLE;
@@ -248,18 +278,18 @@ package screens
 			mainImageContainer.y = 0;
 			mainImageContainer.height = stage.stageHeight - 24;
 			mainImageContainer.width = ASPECT_RATIO * mainImageContainer.height;
-
+			
 			// add components to page
 			addChild(thumbnailContainer);
 			addChild(mainImageContainer);
 		}
 		
+		
 		/**
 		 *  Load pictures from image path into the arrays
 		 *  Take note of the file extensions acceptable by the program
 		 */
-		private function loadPictures():void
-		{
+		private function loadPictures():void {
 			// get all images in the image directory
 			var folder:File = File.applicationDirectory.resolvePath(IMAGE_PATH);
 			var fileArray:Array = folder.getDirectoryListing();
@@ -267,11 +297,9 @@ package screens
 			// temporary index
 			var index:int = 0;
 			
-			for each(var f:File in fileArray)
-			{
+			for each(var f:File in fileArray) {
 				// check file extensions
-				if(f.extension == 'jpg' || f.extension == 'JPG' || f.extension == 'png' || f.extension == 'PNG')
-				{
+				if(f.extension == 'jpg' || f.extension == 'JPG' || f.extension == 'png' || f.extension == 'PNG') {
 					// load images into thumbnail array
 					var thumbnail_loader:ImageLoader = new ImageLoader();
 					thumbnail_loader.source = f.nativePath;
@@ -302,9 +330,14 @@ package screens
 			// add image to the main image container
 			mainImageContainer.addChild(mainImage);
 		}
+		 
 		
-		public function humanAssist(target:Touch) :void 
-		{
+		/**
+		 * Function for finding reflector in the area around the mouse click
+		 */
+		public function humanAssist(target:Touch):void {
+			
+			var center:Point = new Point();
 			
 			// variables for drawing the circle around reflectors
 			var radius:uint = 0;
@@ -339,6 +372,9 @@ package screens
 			
 			// circle sprite to be drawn around desired area
 			var circle:Sprite = new Sprite();
+			
+			// line sprite to be drawn between points
+			var line:Sprite = new Sprite();
 			trace("finding bright pixels");
 			
 			// Check pixels in 100x100 pixel box around the mouse position at the time it was clicked
@@ -436,20 +472,11 @@ package screens
 			bmd.draw(circle);
 			
 			// update text field
-			textField.text = "Radius = " + radius;
+			//textField.text = "Radius = " + radius;
+			
+			updateStateAfterClick(x, y, bmd);
 			
 			trace("updating image");
-			
-			// used for checking pixel resolutions
-			if (!clicked) {
-				point1 = new Point(x,y);
-				clicked = true;
-			}
-			else {
-				point2 = new Point(x,y);
-				calcRes(point1, point2);
-				clicked = false;
-			}
 			
 			// Update image
 			imageArray[index].source = Texture.fromBitmapData(bmd);
@@ -459,6 +486,116 @@ package screens
 			
 			// Update thumbbnail
 			thumbnailArray[index].source = Texture.fromBitmapData(bmd);
+		}
+		
+		
+		/**
+		 * Function for handling what happens after a user clicks on the image
+		 */
+		private function updateStateAfterClick(x:Number, y:Number, bmd:BitmapData):void {
+			
+			// Check if the coordinates are valid
+			if (x > 0 && y > 0) {
+				
+				// assign point locations based on state
+				switch (state) {
+					
+					// case 0 means left shoulder reflector
+					case 0:
+						
+						// set the coordinates
+						left_shoulder.x = x;
+						left_shoulder.y = y;
+						break;
+					
+					// case 1 means right shoulder reflector
+					case 1:
+						
+						// set the coordinates
+						right_shoulder.x = x;
+						right_shoulder.y = y;
+						
+						// draw a line now that we have two points in common
+						drawLine(left_shoulder, right_shoulder);
+						break;
+					
+					// case 2 means left hip reflector
+					case 2:
+						
+						// set the coordinates
+						left_hip.x = x;
+						left_hip.y = y;
+						break;
+					
+					// case 3 means right hip reflector
+					case 3:
+						
+						// set the coordinates
+						right_hip.x = x;
+						right_hip.y = y;
+						
+						// draw a line now that we have two points in common
+						drawLine(left_hip, right_hip);
+						break;
+					default:
+						break;
+				}
+				
+				// update the state
+				if (++state == 4)
+					state = 0;
+				
+				// update the instructions based on the new state
+				updateInstructions();
+			}
+			
+			// location not valid
+			else {
+				textField.text = "There is no reflector at that location.  Please try again.";
+			}
+			
+			// internal function for drawing line between two points
+			function drawLine(p1:Point, p2:Point):void {
+				var line:Sprite = new Sprite();
+				line.graphics.clear();
+				line.graphics.beginFill(BLUE, 1.0);
+				line.graphics.lineStyle(3, BLUE);
+				line.graphics.moveTo(p1.x, p1.y);
+				line.graphics.lineTo(p2.x, p2.y);
+				bmd.draw(line);
+			}
+		}
+		
+		
+		/**
+		 * Function for updating the instructions displayed to the user
+		 */
+		private function updateInstructions():void {
+
+			// update based on state variable
+			switch (state) {
+				
+				// case 0 means left shoulder reflector
+				case 0:
+					textField.text = "Click on the left shoulder reflector";
+					break;
+				
+				// case 1 means right shoulder reflector
+				case 1:
+					textField.text = "Click on the right shoulder reflector";
+					break;
+				
+				// case 2 means left hip reflector
+				case 2:
+					textField.text = "Click on the left hip reflector";
+					break;
+				
+				// case 3 means right hip reflector
+				case 3:
+					textField.text = "Click on the right hip reflector";
+				default:
+					break;
+			}
 		}
 		
 		

@@ -8,10 +8,7 @@ package star
 	import feathers.motion.transitions.ScreenFadeTransitionManager;
 	import feathers.themes.MetalWorksMobileTheme;
 	
-	import screens.CameraScreen;
-	import screens.HomeScreen;
-	import screens.PointFinder;
-	import screens.DisplayScreen;
+	import screens.*;
 	
 	import starling.display.Sprite;
 	import starling.events.Event;
@@ -29,6 +26,7 @@ package star
 		private static const BROWSE_SCREEN:String = "browseScreen"; 
 		private static const POINTFINDER_SCREEN:String = "pointFinder";
 		private static const DISPLAY_SCREEN:String = "displayScreen";
+		private static const SETTINGS_SCREEN:String = "settingsScreen";
 		
 		
 		
@@ -62,6 +60,7 @@ package star
 			screenNavigator.y = navHeight;
 			screenNavigator.width = stage.stageWidth;
 			screenNavigator.height = stage.stageHeight-navHeight;
+			
 			addChild(screenNavigator);
 		}
 		
@@ -76,6 +75,7 @@ package star
 				{label:"Camera Feeds" , data:BROWSE_SCREEN},
 				{label:"Reflector Association Process" , data:POINTFINDER_SCREEN},
 				{label:"3-D Display", data:DISPLAY_SCREEN},
+				{label:"Settings", data:SETTINGS_SCREEN},
 			]);
 			
 			navigationBar.selectedIndex  = 2; // loads homescreens
@@ -105,6 +105,7 @@ package star
 			screenNavigator.addScreen(BROWSE_SCREEN, new ScreenNavigatorItem(CameraScreen));
 			screenNavigator.addScreen(POINTFINDER_SCREEN, new ScreenNavigatorItem(PointFinder));
 			screenNavigator.addScreen(DISPLAY_SCREEN, new ScreenNavigatorItem(DisplayScreen));
+			screenNavigator.addScreen(SETTINGS_SCREEN, new ScreenNavigatorItem(SettingsScreen));
 			
 			// Full control over which screen is being displayed. 
 			screenTransitionManager = new ScreenFadeTransitionManager(screenNavigator);
