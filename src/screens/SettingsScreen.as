@@ -1,20 +1,31 @@
 package screens
 {
-	
+	// flash imports
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.text.TextFormat;
 	
+	// feathers imports
 	import feathers.controls.Button;
 	import feathers.controls.Screen;
 	import feathers.controls.TextArea;
 	import feathers.controls.TextInput;
 	
+	// starling import
 	import starling.events.Event;
 	
+	// begin class SettingsScreen
 	public class SettingsScreen extends Screen {
 		
+		  ///////////////////
+		 //   CONSTANTS  //
+		//////////////////
+		
+		// page title
+		private const TITLE:String = "Settings";
+		
+		// button label
 		private const SAVE:String = "Save settings";
 		
 		// constant field names
@@ -27,8 +38,54 @@ package screens
 		private const BOTTOM_LEFT_DIAG:String = "Lower Left Diagonal:";
 		private const TOP_RIGHT_DIAG:String = "Upper Right Diagonal:";
 		private const BOTTOM_RIGHT_DIAG:String = "Lower Right Diagonal:";
+		private const COORD_TITLE:String = "Camera Coordinates";
+		private const CAM_1_COORDS:String = "Camera 1:";
+		private const CAM_2_COORDS:String = "Camera 2:";
+		private const CAM_3_COORDS:String = "Camera 3:";
+		private const REFLECTOR_COORDS_HEADER:String = "Reflector Coordinates";
 		
-		// input field variables for camera 1
+		// settings file path
+		public static const SETTINGS_PATH:String = "C:/SAS Data/settings.txt";
+		
+		// field sizes
+		private const HEADER_WIDTH:Number = 150;
+		private const HEADER_HEIGHT:Number = 50;
+		private const BOX_WIDTH:Number = 100;
+		private const BOX_HEIGHT:Number = 25;
+		
+		// button sizes
+		private const BUTTON_WIDTH:Number = 100;
+		private const BUTTON_HEIGHT:Number = 50;
+		
+		// font size
+		private const INPUT_FONT_SIZE:Number = 15;
+		
+		  //////////////////
+		 //   VARIABLES  //
+		//////////////////
+		
+		// text field variables
+		private var center_header:TextArea;
+		private var center_left_header:TextArea;
+		private var center_right_header:TextArea;
+		private var center_top_header:TextArea;
+		private var center_bottom_header:TextArea;
+		private var top_left_diag_header:TextArea;
+		private var bottom_left_diag_header:TextArea;
+		private var top_right_diag_header:TextArea;
+		private var bottom_right_diag_header:TextArea;
+		private var title:TextArea;
+		private var cam_coords:TextArea;
+		private var cam_1_header:TextArea;
+		private var cam_2_header:TextArea;
+		private var cam_3_header:TextArea;
+		private var reflector_coords_header:TextArea;
+		private var instructions:TextArea;
+		
+		// input box variables
+		private var cam_1_coords:TextInput;
+		private var cam_2_coords:TextInput;
+		private var cam_3_coords:TextInput;
 		private var center:TextInput;
 		private var center_left:TextInput;
 		private var center_right:TextInput;
@@ -39,59 +96,14 @@ package screens
 		private var top_right_diag:TextInput;
 		private var bottom_right_diag:TextInput;
 		
-		private var center_header:TextArea;
-		private var center_left_header:TextArea;
-		private var center_right_header:TextArea;
-		private var center_top_header:TextArea;
-		private var center_bottom_header:TextArea;
-		private var top_left_diag_header:TextArea;
-		private var bottom_left_diag_header:TextArea;
-		private var top_right_diag_header:TextArea;
-		private var bottom_right_diag_header:TextArea;
-		
-		// default text for input boxes
-		private const COORD_DEFAULT_TEXT:String = "Enter Camera Coordinates";
-		
-		// page title constant
-		private const TITLE:String = "Settings";
-		private var title:TextArea;
-		
-		// coordinates headers and variables
-		private const COORD_TITLE:String = "Camera Coordinates";
-		private const CAM_1_COORDS:String = "Camera 1:";
-		private const CAM_2_COORDS:String = "Camera 2:";
-		private const CAM_3_COORDS:String = "Camera 3:";
-		private var cam_coords:TextArea;
-		private var cam_1_header:TextArea;
-		private var cam_2_header:TextArea;
-		private var cam_3_header:TextArea;
-		private var cam_1_coords:TextInput;
-		private var cam_2_coords:TextInput;
-		private var cam_3_coords:TextInput;
-		
-		private const REFLECTOR_COORDS_HEADER:String = "Reflector Coordinates";
-		private var reflector_coords_header:TextArea;
-		
-		// constant field sizes
-		private const HEADER_WIDTH:Number = 150;
-		private const HEADER_HEIGHT:Number = 50;
-		private const BOX_WIDTH:Number = 100;
-		private const BOX_HEIGHT:Number = 25;
-		
-		// button constants
-		private const BUTTON_WIDTH:Number = 100;
-		private const BUTTON_HEIGHT:Number = 50;
-		
-		// font size
-		private const INPUT_FONT_SIZE:Number = 15;
-		
 		// settings file variables
 		private var settings_file:File;
 		private var filestream:FileStream;
-		public static const SETTINGS_PATH:String = "C:/SAS Data/settings.txt";
 
+		// save button
 		private var save_button:Button;
 		
+		// settings values
 		private var values:Array;
 		
 		
@@ -116,6 +128,7 @@ package screens
 			bottom_left_diag_header = new TextArea();
 			top_right_diag_header = new TextArea();
 			bottom_right_diag_header = new TextArea();
+			instructions = new TextArea();
 			
 			// instantiate input boxes
 			cam_1_coords = new TextInput();
@@ -156,7 +169,7 @@ package screens
 
 			// create camera coordinates title
 			cam_coords.text = COORD_TITLE;
-			cam_coords.width = HEADER_WIDTH;
+			cam_coords.width = HEADER_WIDTH + 100;
 			cam_coords.height = HEADER_HEIGHT;
 			cam_coords.isEditable = false;
 			cam_coords.x = 5;
@@ -207,7 +220,7 @@ package screens
 			
 			// create reflector coordinates title
 			reflector_coords_header.text = REFLECTOR_COORDS_HEADER;
-			reflector_coords_header.width = HEADER_WIDTH;
+			reflector_coords_header.width = HEADER_WIDTH + 100;
 			reflector_coords_header.height = HEADER_HEIGHT;
 			reflector_coords_header.isEditable = false;
 			reflector_coords_header.x = 5;
@@ -284,6 +297,13 @@ package screens
 			bottom_right_diag_header.isEditable = false;
 			bottom_right_diag_header.x = 575;
 			bottom_right_diag_header.y = 352;
+			
+			// create instructions for the user
+			instructions.text = "*** Input coordinates with the following format: 1.0,2.0,3.0 (no spaces)\n*** All units are in Meters";
+			instructions.width = 900;
+			instructions.height = 200;
+			instructions.x = 25;
+			instructions.y = 450;
 			
 			// create center reflector input box
 			center.width = BOX_WIDTH;
@@ -375,6 +395,7 @@ package screens
 			addChild(bottom_right_diag_header);
 			addChild(bottom_right_diag);
 			addChild(save_button);
+			addChild(instructions);
 			
 			// change text formats
 			title.textEditorProperties.textFormat = new TextFormat("Arial", 30, 0xffffff);
@@ -392,6 +413,7 @@ package screens
 			bottom_left_diag_header.textEditorProperties.textFormat = new TextFormat("Arial", 15, 0xffffff);
 			top_right_diag_header.textEditorProperties.textFormat = new TextFormat("Arial", 15, 0xffffff);
 			bottom_right_diag_header.textEditorProperties.textFormat = new TextFormat("Arial", 15, 0xffffff);
+			instructions.textEditorProperties.textFormat = new TextFormat("Arial", 20, 0xffffff);
 			
 			// change font sizes of input boxes to be readable
 			cam_1_coords.textEditorProperties.fontSize = INPUT_FONT_SIZE;
@@ -407,14 +429,20 @@ package screens
 			top_right_diag.textEditorProperties.fontSize = INPUT_FONT_SIZE;
 			bottom_right_diag.textEditorProperties.fontSize = INPUT_FONT_SIZE;
 			
+			// read settings file to get current values
 			values = readSettingsFile();
+			
+			// set current values
 			loadSettings(values);
 		}
 		
 		
-		
+		/**
+		 * Function for saving settings to text file
+		 */
 		private function writeSettingsToFile(event:Event):void {
 			
+			// set the settings file
 			settings_file = File.desktopDirectory.resolvePath(SETTINGS_PATH);
 			
 			// open the file
@@ -427,7 +455,7 @@ package screens
 			filestream.writeUTFBytes("center:" + center.text + "\r\n");
 			filestream.writeUTFBytes("center_left:" + center_left.text + "\r\n");
 			filestream.writeUTFBytes("center_right:" + center_right.text + "\r\n");
-			filestream.writeUTFBytes("center_top:" + center_top.text+ "\r\n");
+			filestream.writeUTFBytes("center_top:" + center_top.text + "\r\n");
 			filestream.writeUTFBytes("center_bottom:" + center_bottom.text + "\r\n");
 			filestream.writeUTFBytes("top_left_diag:" + top_left_diag.text + "\r\n");
 			filestream.writeUTFBytes("bottom_left_diag:" + bottom_left_diag.text + "\r\n");
@@ -438,6 +466,10 @@ package screens
 			filestream.close();
 		}
 		
+		
+		/**
+		 * Function for reading the settings file and storing the values in an array
+		 */
 		public static function readSettingsFile():Array {
 			
 			// set the file and open the filestream
@@ -465,6 +497,10 @@ package screens
 			return values;
 		}
 		
+		
+		/**
+		 * Function for loading the current settings to show in input boxes
+		 */
 		private function loadSettings(values:Array):void {
 			
 			// place each value in appropriate input box
