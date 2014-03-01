@@ -1,5 +1,12 @@
 package screens
 {
+	import flash.display.NativeWindow;
+	import flash.display.NativeWindowInitOptions;
+	import flash.display.StageAlign;
+	import flash.display.StageScaleMode;
+	import flash.events.Event;
+	import flash.geom.Vector3D;
+	
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.View3D;
 	import away3d.entities.Mesh;
@@ -11,13 +18,6 @@ package screens
 	import away3d.utils.Cast;
 	
 	import feathers.controls.Screen;
-	
-	import flash.display.NativeWindow;
-	import flash.display.NativeWindowInitOptions;
-	import flash.display.StageAlign;
-	import flash.display.StageScaleMode;
-	import flash.events.Event;
-	import flash.geom.Vector3D;
 	
 	[SWF(backgroundColor="#000000", frameRate="60", quality="LOW")]
 	

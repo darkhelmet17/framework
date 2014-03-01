@@ -25,6 +25,9 @@ package screens
 	
 	public class PointFinder extends Screen {
 		
+		private var a:Array;
+		private var cnt:Number;
+		
 		  ////////////////////////////
 		 ////      Constants    /////
 		////////////////////////////
@@ -35,7 +38,7 @@ package screens
 		private const BLUE:uint = 0x0000ff;
 		
 		// brightness threshold
-		private const BRIGHTNESS_THRESHOLD:uint = 3400000;
+		private const BRIGHTNESS_THRESHOLD:uint = 2000000;
 		
 		// box bound around mouse click area
 		private const BOUNDS:uint = 30;
@@ -51,7 +54,7 @@ package screens
 		private const ASPECT_RATIO:Number = 8/5;
 		
 		// Path to where the images are
-		private const IMAGE_PATH:String = "C:/camera images/New folder/"; 
+		private const IMAGE_PATH:String = "C:/SAS Data/camera images/"; 
 		
 		  ///////////////////////////
 		 //// Regular Variables ////
@@ -79,6 +82,7 @@ package screens
 		
 		// text field to display instructions to user
 		private var textField:TextField;
+		private var textField2:TextField;
 		
 		// hard-coded variables for pixel resolution
 		private var distance_away:Number = 1.5494; // in meters
@@ -103,6 +107,9 @@ package screens
 		 * Constructor
 		 */
 		public function PointFinder() {
+			
+			a = new Array();
+			cnt = 0;
 			
 			// create layout objects
 			layout = new VerticalLayout();
@@ -131,6 +138,11 @@ package screens
 			textField.y = 500;
 			textField.color = 0xffffff;
 			
+			textField2 = new TextField(220, 100, "");
+			textField2.x = 0;
+			textField2.y = 400;
+			textField2.color = 0xffffff;
+			
 			// Add the mouse click event
 			this.addEventListener(TouchEvent.TOUCH, onTouch);
 		}
@@ -152,6 +164,7 @@ package screens
 			
 			// add the text field to the screen
 			addChild(textField);
+			addChild(textField2);
 		}
 		
 		
@@ -218,7 +231,7 @@ package screens
 								}
 								
 								// update the instructions to the user
-								updateInstructions();
+								//updateInstructions();
 								
 								// set correct sizes of the image
 								mainImage.maintainAspectRatio = false;
@@ -284,8 +297,8 @@ package screens
 			mainImageContainer.y = 0;
 			
 			// scale container to fit the screen
-			mainImageContainer.width = stage.stageWidth - 220;
-			mainImageContainer.height = (1/ASPECT_RATIO) * mainImageContainer.width;
+			mainImageContainer.width = stage.stageWidth - thumbnailContainer.width - 55;
+			mainImageContainer.height = ((1/ASPECT_RATIO) * mainImageContainer.width);
 			
 			// add components to page
 			addChild(thumbnailContainer);
@@ -480,7 +493,33 @@ package screens
 			bmd.draw(circle);
 			
 			// update text field
-			//textField.text = "Radius = " + radius;
+			
+			textField.text = "x: " + x + "; y: " + y;
+			textField2.text = "image width = " + mainImage.width + "; image height = " + mainImage.height;
+			
+			a.push(new Point(x, y));
+			if (++cnt == 2) {
+				var centerx:Number = mainImage.width / 2;
+				var centery:Number = mainImage.height / 2;
+				
+				var xl:Number = centerx - a[0].x;
+				var xr:Number = centerx - a[1].x;
+				
+				var degperpix:Number = 51.8 / mainImage.width;
+				
+				var deg1:Number = degperpix * xl;
+				var deg2:Number = degperpix * xr;
+				
+				xl = 4 * Math.tan(deg1);
+				xr = 4 * Math.tan(deg2);
+				
+				var distance:Number = (304.8 * 4) / (xl - xr);
+				
+				var hyp:Number = Math.sqrt((xl * xl) + (distance * distance));
+				
+				textField.text = "" + distance + "; hyp = " + hyp;
+			}
+			
 			
 			updateStateAfterClick(x, y, bmd);
 			
@@ -572,6 +611,7 @@ package screens
 				line.graphics.lineTo(p2.x, p2.y);
 				bmd.draw(line);
 				
+				// if two sets of lines are placed, draw a line between them
 				if(complete) {
 					var center:Sprite = new Sprite();
 					center.graphics.clear();
