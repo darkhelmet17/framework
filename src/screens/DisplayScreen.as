@@ -139,6 +139,15 @@ package screens
 			//addEventListener(Event.ENTER_FRAME, update);
 		}
 		
+		public override function dispose():void {
+			window.minimize();
+			
+			while(away3dView.scene.numChildren > 0)
+				away3dView.scene.removeChildAt(0);
+			
+			while (window.stage.numChildren > 0)
+				window.stage.removeChildAt(0);
+		}
 		
 		
 		/*
