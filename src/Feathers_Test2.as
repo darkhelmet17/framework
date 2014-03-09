@@ -1,6 +1,7 @@
 package
 {
 	// import Away3D packages
+	import flash.display.Bitmap;
 	import flash.display.NativeWindow;
 	import flash.display.NativeWindowInitOptions;
 	import flash.display.Sprite;
@@ -8,7 +9,9 @@ package
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
+	import flash.events.TimerEvent;
 	import flash.geom.Rectangle;
+	import flash.utils.Timer;
 	
 	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DManager;
@@ -43,6 +46,13 @@ package
 		public static var stage3DProxy:Stage3DProxy;
 		public static var away3dView:View3D;
 		
+		
+		// Splash screen
+		[Embed(source="../assets/screen images/splash.png")]
+		private var Splash:Class;
+		private var splash:Bitmap;
+		
+		
 		/**
 		 * Constructor
 		 */
@@ -76,6 +86,13 @@ package
 			stage.nativeWindow.maximize();
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
+			
+			// Splash screen
+			splash = new Splash();
+			splash.addEventListener(Event.ENTER_FRAME, onAddedToStage);
+			addChild(splash);
+			splash.width = stage.stageWidth;
+			splash.height = stage.stageHeight;
 			
 			// add event listeners
 			loaderInfo.addEventListener(Event.COMPLETE, onLoadComplete);
@@ -156,6 +173,26 @@ package
 			
 			// apply to starling viewport
 			starling.viewPort = viewPort;
+		}
+		
+		
+		//Call this once your first Starling view has rendered
+		public function removeSplash(event:TimerEvent):void
+		{
+			if (splash && splash.parent)
+			{
+				removeChild(splash);
+			}
+		}
+		
+		private function onAddedToStage(event:Event):void
+		{
+			splash.removeEventListener(Event.ENTER_FRAME, onAddedToStage);
+			
+			
+			var timer:Timer = new Timer(1500);
+			timer.addEventListener(TimerEvent.TIMER, removeSplash); // will call callback()
+			timer.start();
 		}
 	}
 }

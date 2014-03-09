@@ -1,19 +1,16 @@
-package screens
-{
+package screens {
+	
 	import feathers.controls.ImageLoader;
 	import feathers.controls.Label;
 	import feathers.controls.Screen;
 	import feathers.controls.ScrollContainer;
-	import feathers.events.FeathersEventType;
 	import feathers.layout.VerticalLayout;
 	
-	import starling.events.Event;
 	import starling.textures.Texture;
 
  			// using png images as textures for feathers controls image loader
 	
-	public class HomeScreen extends Screen
-	{
+	public class HomeScreen extends Screen {
 		[Embed(source="/../assets/screen images/blue_skeleton.jpg")]
 		private static const TitleImage:Class; // use this to refer to the image data
 		
@@ -31,8 +28,7 @@ package screens
 			
 		}
 		
-		private function loadTitles():void
-		{
+		private function loadTitles():void {
 			titleLoader = new ImageLoader();
 			//titleLoader.maintainAspectRatio = true; // this changes the images to maintain aspect ration
 			
@@ -47,8 +43,8 @@ package screens
 			scrollContainer.addChild(subText);
 		}
 		
-		private function buildContainer():void
-		{
+		
+		private function buildContainer():void {
 			verticalLayout = new VerticalLayout(); 
 			verticalLayout.verticalAlign = VerticalLayout.VERTICAL_ALIGN_TOP;
 			verticalLayout.horizontalAlign = VerticalLayout.HORIZONTAL_ALIGN_CENTER;
@@ -62,7 +58,7 @@ package screens
 			addChild(scrollContainer); // add to the screen class
 		}
 		
-		// method of screen class, made to be overwritten. 
+		
 		// position and size things accurately.
 		override protected function draw():void{
 			titleLoader.validate(); // enforce current numbers to use them

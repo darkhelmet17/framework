@@ -827,9 +827,6 @@ package screens
 		}
 		
 		
-		/**
-		 * TODO: Vector3D class has a magnitude function
-		 */
 		private function calcMagnatude(point:Vector3D, camera:Vector3D):Number {
 			var mx:Number = Math.pow(point.x - camera.x, 2);
 			var my:Number = Math.pow(point.y - camera.y, 2);
@@ -1353,7 +1350,7 @@ package screens
 				filestream.writeUTFBytes("bottom:" + calibStep[i][4] + "\r\n");
 			}
 			
-			
+			//TODO: Save more settings
 			
 			// close the filestream
 			filestream.close();
@@ -1384,6 +1381,8 @@ package screens
 				values[i] = tempvals[1];
 				
 			}
+			
+			//TODO: Load more settings
 			
 			// load picture 1 calibrations
 			calibStep[0][0] = values[1];
