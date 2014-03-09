@@ -142,6 +142,9 @@ package star
 			
 			// finalize everything
 			completeLayout();
+			
+			// add event listener
+			stage.addEventListener(Event.RESIZE, resize);
 		}
 
 		
@@ -155,6 +158,10 @@ package star
 			// we are passing in the selectedItem.data ATTRIBUTE from the navigation bar
 			screenNavigator.showScreen(navigationBar.selectedItem.data);
 			
+		}
+		
+		private function resize(event:Event):void {
+			navigationBar.width = stage.stageWidth;
 		}
 	}
 }
