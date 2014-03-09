@@ -132,21 +132,63 @@ package screens
 		
 		public function DisplayScreen()
 		{
+			// create references to static objects
 			window = Feathers_Test2.window;
+			away3dView = Feathers_Test2.away3dView;
+			stage3DProxy = Feathers_Test2.stage3DProxy;
+			stage3DManager = Feathers_Test2.stage3DManager;
+
+			// check window for existing objects and remove them
+			checkWindow();
 			
 			iniArray();		
 			init();
 			//addEventListener(Event.ENTER_FRAME, update);
 		}
 		
-		public override function dispose():void {
-			window.minimize();
+		
+		/**
+		 * checkWindow(): Checks the native window for existing objects and listeners, then removes them
+		 */
+		private function checkWindow():void {
 			
+			// remove all scene items from the away3d view
 			while(away3dView.scene.numChildren > 0)
 				away3dView.scene.removeChildAt(0);
 			
-			while (window.stage.numChildren > 0)
+			// remove all objects from the stage
+			while(window.stage.numChildren > 0)
 				window.stage.removeChildAt(0);
+			
+			// remove all event listeners, if they exist
+			if (window.stage.hasEventListener(KeyboardEvent.KEY_DOWN))
+				window.stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyDown);
+			
+			if (window.stage.hasEventListener(KeyboardEvent.KEY_UP))
+				window.stage.removeEventListener(KeyboardEvent.KEY_UP, keyUp);
+			
+			if (window.stage.hasEventListener(MouseEvent.MOUSE_DOWN))
+				window.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			
+			if (window.stage.hasEventListener(MouseEvent.MOUSE_UP))
+				window.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			
+			if (window.hasEventListener(NativeWindowBoundsEvent.RESIZE))
+				window.removeEventListener(NativeWindowBoundsEvent.RESIZE, onResize);
+			
+			if (stage3DProxy.hasEventListener(Stage3DEvent.CONTEXT3D_CREATED))
+				stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextCreated);
+			
+			if (stage3DProxy.hasEventListener(Event.ENTER_FRAME))
+				stage3DProxy.removeEventListener(Event.ENTER_FRAME, update);
+		}
+		
+		
+		/**
+		 * Override of default dispose() function to ensure that the window minimizes
+		 */
+		public override function dispose():void {
+			window.minimize();
 		}
 		
 		
@@ -161,6 +203,7 @@ package screens
 			// set up stage and stage manager
 			initStage();
 			// activate the window
+			window.activate();
 			window.maximize();
 		}
 		
@@ -172,11 +215,6 @@ package screens
 		*/
 		private function initStage():void
 		{
-			// Define a new Stage3DManager for the Stage3D objects
-			stage3DManager = Feathers_Test2.stage3DManager;
-			
-			// Create a new Stage3D proxy to contain the separate views
-			stage3DProxy = Feathers_Test2.stage3DProxy;
 			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextCreated);
 			stage3DProxy.antiAlias = 8;
 			stage3DProxy.color = 0x000000;
@@ -633,7 +671,6 @@ package screens
 		private function initAway3D():void
 		{
 			// Create the first Away3D view which holds the cube objects.
-			away3dView = new View3D();
 			away3dView.backgroundColor = 0x00FF00;
 			away3dView.stage3DProxy = stage3DProxy;
 			away3dView.shareContext = true;

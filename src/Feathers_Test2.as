@@ -1,10 +1,6 @@
 package
 {
 	// import Away3D packages
-	import away3d.core.managers.Stage3DManager;
-	import away3d.core.managers.Stage3DProxy;
-	
-	// import flash packages	
 	import flash.display.NativeWindow;
 	import flash.display.NativeWindowInitOptions;
 	import flash.display.Sprite;
@@ -14,10 +10,12 @@ package
 	import flash.events.KeyboardEvent;
 	import flash.geom.Rectangle;
 	
-	// import Main file
+	import away3d.containers.View3D;
+	import away3d.core.managers.Stage3DManager;
+	import away3d.core.managers.Stage3DProxy;
+	
 	import star.Main;
 	
-	// import Starling package
 	import starling.core.Starling;
 	
 	// set size and background of window
@@ -43,12 +41,14 @@ package
 		// stage3D variables used for new native window
 		public static var stage3DManager:Stage3DManager;
 		public static var stage3DProxy:Stage3DProxy;
+		public static var away3dView:View3D;
 		
 		/**
 		 * Constructor
 		 */
 		public function Feathers_Test2() {
 			
+			// create starling instance
 			starling = new Starling(Main, stage);
 			
 			// set window initializer settings
@@ -68,6 +68,9 @@ package
 			
 			// Create a new Stage3D proxy to contain the separate views
 			stage3DProxy = stage3DManager.getFreeStage3DProxy();
+			
+			// create static View3D object
+			away3dView = new View3D();
 			
 			// ensure that the main window starts with a maximized window
 			stage.nativeWindow.maximize();
