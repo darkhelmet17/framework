@@ -107,6 +107,10 @@ package screens
 		private var values:Array;
 		
 		
+//-----------------------------------------------------------------------------------------------------------------//
+//-----------------------------------------------------------------------------------------------------------------//
+		
+		
 		/**
 		 * Constructor
 		 */
@@ -157,6 +161,10 @@ package screens
 			save_button.addEventListener(starling.events.Event.TRIGGERED, writeSettingsToFile);
 		}
 		
+		
+		/**
+		 * initialize(): override of the standard initialize function
+		 */
 		override protected function initialize():void {
 			
 			// create title of the page
@@ -299,11 +307,11 @@ package screens
 			bottom_right_diag_header.y = 352;
 			
 			// create instructions for the user
-			instructions.text = "*** Input coordinates with the following format: 1.0,2.0,3.0 (no spaces)\n*** All units are in Meters";
+			instructions.text = "*** Input coordinates with the following format: x,y,z (no spaces) where x,y and z are numbers\n*** All units are in Meters";
 			instructions.width = 900;
 			instructions.height = 200;
 			instructions.x = 25;
-			instructions.y = 450;
+			instructions.y = 500;
 			
 			// create center reflector input box
 			center.width = BOX_WIDTH;

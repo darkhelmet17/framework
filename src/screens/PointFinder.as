@@ -4,9 +4,13 @@ package screens
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.geom.Vector3D;
 	
+	import feathers.controls.Button;
 	import feathers.controls.ImageLoader;
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.Screen;
@@ -17,6 +21,7 @@ package screens
 	import starling.core.RenderSupport;
 	import starling.core.Starling;
 	import starling.display.Image;
+	import starling.events.Event;
 	import starling.events.Touch;
 	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
@@ -25,11 +30,8 @@ package screens
 	
 	public class PointFinder extends Screen {
 		
-		private var a:Array;
-		private var cnt:Number;
-		
-		  ////////////////////////////
-		 ////      Constants    /////
+		////////////////////////////
+		////      Constants    /////
 		////////////////////////////
 		
 		// color constants
@@ -38,7 +40,7 @@ package screens
 		private const BLUE:uint = 0x0000ff;
 		
 		// brightness threshold
-		private const BRIGHTNESS_THRESHOLD:uint = 2000000;
+		private const BRIGHTNESS_THRESHOLD:uint = 3000000;
 		
 		// box bound around mouse click area
 		private const BOUNDS:uint = 30;
@@ -56,8 +58,13 @@ package screens
 		// Path to where the images are
 		private const IMAGE_PATH:String = "C:/SAS Data/camera images/"; 
 		
-		  ///////////////////////////
-		 //// Regular Variables ////
+		private const CAM_1_CALIBRATION_SETTINGS:String = "C:/SAS Data/cam1calibration.txt";
+		private const CAM_2_CALIBRATION_SETTINGS:String = "C:/SAS Data/cam2calibration.txt";
+		private const CAM_3_CALIBRATION_SETTINGS:String = "C:/SAS Data/cam3calibration.txt";
+		
+		
+		///////////////////////////
+		//// Regular Variables ////
 		///////////////////////////
 		
 		// Arrays to hold pictures
@@ -82,11 +89,6 @@ package screens
 		
 		// text field to display instructions to user
 		private var textField:TextField;
-		private var textField2:TextField;
-		
-		// hard-coded variables for pixel resolution
-		private var distance_away:Number = 1.5494; // in meters
-		private var distance:Number = 0.5; // in meters
 		
 		// Reflector center-point variables
 		private var left_shoulder:Point;
@@ -98,19 +100,36 @@ package screens
 		// variable for keeping track of which reflector state we are in
 		private var state:Number;
 		
-		  ///////////////////////
-		 //     Functions     //
-		///////////////////////
+		// file variables
+		private var file:File;
+		private var filestream:FileStream;
 		
+		// camera objects
+		private var cam1:CameraImage;
+		private var cam2:CameraImage;
+		private var cam3:CameraImage;
+		
+		
+		private var x1:Number, x2:Number;
+		private var clicks:Number = 0;
+		
+		private var numThumbNails:int = 0;
+		
+		private var bCalib:Button;
+		private var isCalibrating:Boolean = false;
+		private var calibStage:int = 0;
+		private var calibStep:Array;
+		
+
+		
+		///////////////////////
+		//     Functions     //
+		///////////////////////
 		
 		/**
 		 * Constructor
 		 */
 		public function PointFinder() {
-			
-			a = new Array();
-			cnt = 0;
-			
 			// create layout objects
 			layout = new VerticalLayout();
 			thumbnailContainer = new ScrollContainer();
@@ -121,6 +140,15 @@ package screens
 			right_shoulder = new Point();
 			left_hip = new Point();
 			right_hip = new Point();
+			
+			// initialize filestream
+			filestream = new FileStream();
+			
+			// create camera objects
+			cam1 = new CameraImage(1);
+			cam2 = new CameraImage(2);
+			cam3 = new CameraImage(3);
+			
 			
 			// set initial state
 			state = 0;
@@ -138,15 +166,22 @@ package screens
 			textField.y = 500;
 			textField.color = 0xffffff;
 			
-			textField2 = new TextField(220, 100, "");
-			textField2.x = 0;
-			textField2.y = 400;
-			textField2.color = 0xffffff;
+			// Init button
+			bCalib = new Button();
+			bCalib.label = "Calibrate";
+			bCalib.width = 100;
+			bCalib.height = 50;
+			bCalib.x = 10;
+			bCalib.y = 600;
+			
+			isCalibrating = false;
+			
+		//	loadSettings();
 			
 			// Add the mouse click event
 			this.addEventListener(TouchEvent.TOUCH, onTouch);
+			bCalib.addEventListener(starling.events.Event.TRIGGERED, startCalibrate);
 		}
-		
 		
 		/**
 		 * Override of initialize() function used to set up containers on the screen
@@ -159,14 +194,16 @@ package screens
 			// Load Pictures from the file path
 			loadPictures();
 			
+			// REMOVE
+			numThumbNails = 2;
+			
 			// Initilize the thumbbnails
 			initThumbbnails();
 			
 			// add the text field to the screen
 			addChild(textField);
-			addChild(textField2);
+			addChild(bCalib);
 		}
-		
 		
 		/**
 		 * Event handler to determine which actions to take when the screen is clicked on
@@ -186,60 +223,54 @@ package screens
 					// Equal to mouse up
 					case TouchPhase.ENDED:
 						
-						// If the mouse moved < 10 then do not change the picture AKA user was scrolling the container
-						if(Math.abs(t.globalX - touchBeginX) < 10) {
-							if(Math.abs(t.globalY - touchBeginY) < 10) {
-								trace("Target Name " + t.target.name);
-								
-								// user clicked main image
-								if(t.target.name == "mainImage") {
-									trace("human assist called");
-									humanAssist(t);
-								}	
-								
-								// user clicked 1st thumbnail
-								else if(t.target.name == "thumbnail0") {
-									mainImage = imageArray[0];
-									
-									// reset the state
-									state = 0;
-									
-									// set the array index
-									index = 0;
+						// If in calibration mode
+						if(isCalibrating)
+						{
+							// If inside the main image x-wise
+							if(t.globalX > -X_SCALE)
+							{
+								// If inside the main image y-wise
+								if(t.globalY > -Y_SCALE)
+								{
+									// Let's calibrate (find the middle image)
+									calibrate(t, index);	
 								}
-								
-								// user clicked 2nd thumbnail
-								else if(t.target.name == "thumbnail1") {
-									mainImage = imageArray[1];
+							}	
+						}
+						else // not calibrating
+						{
+							// If the mouse moved < 10 then do not change the picture AKA user was scrolling the container
+							if(Math.abs(t.globalX - touchBeginX) < 10) {
+								if(Math.abs(t.globalY - touchBeginY) < 10) {
+									// trace("Target Name " + t.target.name);
 									
-									// reset the state
-									state = 0;
+									// update the instructions to the user - moved to the top b/c calibration textfield in centerpoint
+									updateInstructions();
 									
-									// set the array index
-									index = 1;
+									// user clicked main image
+									if(t.target.name == "mainImage") {
+										humanAssist(t);
+									}
+									else
+									{
+										// Make sure the user isn't touching the container of thumbnails or somewhere else invalid
+										if(t.target.name != null)
+										{
+											// Dynamically get the thumbnail clicked
+											index = int(t.target.name.substring(t.target.name.length - 1, t.target.name.length));
+											mainImage = imageArray[index];
+											state = 0;
+										}
+									}
+									
+									// set correct sizes of the image
+									mainImage.maintainAspectRatio = false;
+									mainImage.width = mainImageContainer.width;
+									mainImage.height = mainImageContainer.height;
+									
+									// add the image to the container
+									mainImageContainer.addChild(mainImage);
 								}
-								
-								// user clicked 3rd thumbnail
-								else if(t.target.name == "thumbnail2") {
-									mainImage = imageArray[2];
-									
-									// reset the state
-									state = 0;
-									
-									// set the array index
-									index = 2;
-								}
-								
-								// update the instructions to the user
-								//updateInstructions();
-								
-								// set correct sizes of the image
-								mainImage.maintainAspectRatio = false;
-								mainImage.width = mainImageContainer.width;
-								mainImage.height = mainImageContainer.height;
-								
-								// add the image to the container
-								mainImageContainer.addChild(mainImage);
 							}
 						}
 						break;
@@ -247,6 +278,45 @@ package screens
 			}
 		}
 		
+	
+		
+		/**
+		 * Finds the center of a dot in the picture
+		 */
+		private function findCenter(target:Touch):Point
+		{
+			// Get location of mouse click
+			var location:Point = new Point(target.globalX + X_SCALE, target.globalY + Y_SCALE);
+			// trace("coordinates - x: " + location.x + ", y: " + location.y);
+			
+			var bmd:BitmapData = copyAsBitmapData(mainImage);
+			
+			// variables used to calculate average positions of pixels
+			var sumXCoords:uint = 0;
+			var sumYCoords:uint = 0;
+			var totalPixels:uint = 0;
+			
+			// Check pixels in 100x100 pixel box around the mouse position at the time it was clicked
+			for (var i:int = location.x - BOUNDS; i < location.x + BOUNDS; i++) {
+				for (var j:uint = location.y - BOUNDS; j < location.y + BOUNDS; j++){
+					
+					// If "brightness" is greater than a certain amount, color that pixel red
+					if (calcBrightness(bmd.getPixel(i, j)) > BRIGHTNESS_THRESHOLD) {
+						totalPixels++; //increment the total number of pixels by 1
+						sumXCoords += i; // add the i coordinate to running total
+						sumYCoords += j; // add the j coordinate to running total
+					}
+				}
+			}
+			
+			// calculate the center of the circle
+			var x:Number = sumXCoords/totalPixels;
+			var y:Number = sumYCoords/totalPixels;
+			
+			var point:Point = new Point(x,y);
+			
+			return point;
+		}
 		
 		/**
 		 * Loads each picture into a sized down thumbbnail version of it into the scrolling container
@@ -272,7 +342,6 @@ package screens
 			}
 		}
 		
-		
 		/**
 		 * Function to build the display containers for the screen
 		 */
@@ -297,14 +366,13 @@ package screens
 			mainImageContainer.y = 0;
 			
 			// scale container to fit the screen
-			mainImageContainer.width = stage.stageWidth - thumbnailContainer.width - 55;
-			mainImageContainer.height = ((1/ASPECT_RATIO) * mainImageContainer.width);
+			mainImageContainer.width = stage.stageWidth - 220;
+			mainImageContainer.height = (1/ASPECT_RATIO) * mainImageContainer.width;
 			
 			// add components to page
 			addChild(thumbnailContainer);
 			addChild(mainImageContainer);
 		}
-		
 		
 		/**
 		 *  Load pictures from image path into the arrays
@@ -321,6 +389,9 @@ package screens
 			for each(var f:File in fileArray) {
 				// check file extensions
 				if(f.extension == 'jpg' || f.extension == 'JPG' || f.extension == 'png' || f.extension == 'PNG') {
+					// Keep track of the number of images
+					numThumbNails++;
+					
 					// load images into thumbnail array
 					var thumbnail_loader:ImageLoader = new ImageLoader();
 					thumbnail_loader.source = f.nativePath;
@@ -351,7 +422,6 @@ package screens
 			// add image to the main image container
 			mainImageContainer.addChild(mainImage);
 		}
-		 
 		
 		/**
 		 * Function for finding reflector in the area around the mouse click
@@ -389,14 +459,14 @@ package screens
 			
 			// Get location of mouse click
 			var location:Point = new Point(target.globalX + X_SCALE, target.globalY + Y_SCALE);
-			trace("coordinates - x: " + location.x + ", y: " + location.y);
+			// trace("coordinates - x: " + location.x + ", y: " + location.y);
 			
 			// circle sprite to be drawn around desired area
 			var circle:Sprite = new Sprite();
 			
 			// line sprite to be drawn between points
 			var line:Sprite = new Sprite();
-			trace("finding bright pixels");
+			// trace("finding bright pixels");
 			
 			// Check pixels in 100x100 pixel box around the mouse position at the time it was clicked
 			for (var i:uint = location.x - BOUNDS; i < location.x + BOUNDS; i++) {
@@ -412,13 +482,13 @@ package screens
 				}
 			}
 			
-			trace("done finding bright pixels");
+			// trace("done finding bright pixels");
 			
 			// calculate the center of the circle
 			x = sumXCoords/totalPixels;
 			y = sumYCoords/totalPixels;
 			
-			trace("finding avg width");
+			// trace("finding avg width");
 			
 			/* find the average width of the hilighted area  */
 			
@@ -451,7 +521,7 @@ package screens
 			avgWidth = widths/rows;
 			
 			/* find the average height of the hilighted area */
-			trace("finding avg height");
+			// trace("finding avg height");
 			// loop through each column first
 			for (j = location.y - BOUNDS; j < location.y + BOUNDS; j++) {
 				
@@ -482,7 +552,7 @@ package screens
 			
 			// average the width and height together to get the radius
 			radius = (avgWidth + avgHeight)/2;
-			trace("drawing circle");
+			// trace("drawing circle");
 			
 			// draw the circle around the reflector
 			circle.graphics.clear();
@@ -493,37 +563,9 @@ package screens
 			bmd.draw(circle);
 			
 			// update text field
-			
-			textField.text = "x: " + x + "; y: " + y;
-			textField2.text = "image width = " + mainImage.width + "; image height = " + mainImage.height;
-			
-			a.push(new Point(x, y));
-			if (++cnt == 2) {
-				var centerx:Number = mainImage.width / 2;
-				var centery:Number = mainImage.height / 2;
-				
-				var xl:Number = centerx - a[0].x;
-				var xr:Number = centerx - a[1].x;
-				
-				var degperpix:Number = 51.8 / mainImage.width;
-				
-				var deg1:Number = degperpix * xl;
-				var deg2:Number = degperpix * xr;
-				
-				xl = 4 * Math.tan(deg1);
-				xr = 4 * Math.tan(deg2);
-				
-				var distance:Number = (304.8 * 4) / (xl - xr);
-				
-				var hyp:Number = Math.sqrt((xl * xl) + (distance * distance));
-				
-				textField.text = "" + distance + "; hyp = " + hyp;
-			}
-			
+			//textField.text = "Radius = " + radius;
 			
 			updateStateAfterClick(x, y, bmd);
-			
-			trace("updating image");
 			
 			// Update image
 			imageArray[index].source = Texture.fromBitmapData(bmd);
@@ -536,6 +578,7 @@ package screens
 		}
 		
 		
+		
 		/**
 		 * Function for handling what happens after a user clicks on the image
 		 */
@@ -543,6 +586,7 @@ package screens
 			
 			// Check if the coordinates are valid
 			if (x > 0 && y > 0) {
+				
 				
 				// assign point locations based on state
 				switch (state) {
@@ -553,6 +597,8 @@ package screens
 						// set the coordinates
 						left_shoulder.x = x;
 						left_shoulder.y = y;
+						
+						
 						break;
 					
 					// case 1 means right shoulder reflector
@@ -592,11 +638,13 @@ package screens
 				if (++state == 4)
 					state = 0;
 				
+				
+				
 				// update the instructions based on the new state
 				updateInstructions();
 			}
-			
-			// location not valid
+				
+				// location not valid
 			else {
 				textField.text = "There is no reflector at that location.  Please try again.";
 			}
@@ -611,7 +659,6 @@ package screens
 				line.graphics.lineTo(p2.x, p2.y);
 				bmd.draw(line);
 				
-				// if two sets of lines are placed, draw a line between them
 				if(complete) {
 					var center:Sprite = new Sprite();
 					center.graphics.clear();
@@ -625,12 +672,11 @@ package screens
 			}
 		}
 		
-		
 		/**
 		 * Function for updating the instructions displayed to the user
 		 */
 		private function updateInstructions():void {
-
+			
 			// update based on state variable
 			switch (state) {
 				
@@ -657,18 +703,7 @@ package screens
 			}
 		}
 		
-		
-		/**
-		 * Function to calculate pixel resolution based on mouse clicks
-		 */
-		private function calcRes(point1:Point, point2:Point):void {
-			var x:Number = Math.abs(point2.x - point1.x);
-			var y:Number = Math.abs(point2.y - point1.y);
-			
-			var res:Number = distance / x; // meters per pixel
-			textField.text = "resolution = " + (res * 1000) + " millimeters per pixel";
-		}
-		
+
 		
 		/**
 		 * calcBrightness() is a function to calculate the brightness of a pixel
@@ -681,7 +716,6 @@ package screens
 			
 			return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
 		}
-		
 		
 		/**
 		 * Makes a deep copy of a starling display object and returns a bitmapdata
@@ -715,6 +749,29 @@ package screens
 			context.drawToBitmapData(result);
 			
 			return result;
+		}
+		
+		private function startCalibrate():void
+		{
+			isCalibrating = true;
+			
+			textField.text = "CALIBRATING: Please click the center dot";
+			
+			index = 0;
+			
+			mainImage = imageArray[0];
+			
+			// set correct sizes of the image
+			mainImage.maintainAspectRatio = false;
+			mainImage.width = mainImageContainer.width;
+			mainImage.height = mainImageContainer.height;
+			
+			// add the image to the container
+			mainImageContainer.addChild(mainImage);
+		}
+		
+		private function calibrate(t:Touch, index:Number):void {
+			
 		}
 	}
 }
