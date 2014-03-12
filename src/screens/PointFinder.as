@@ -62,11 +62,17 @@ package screens
 		// path to calibration settings
 		private const CALIB_PATH:String = "C:/SAS Data/calibration settings.txt";
 		
+		// path to coordinates file
+		private const COORD_PATH:String = "C:/SAS Data/coordinates.txt";
+		
 		// Number of reflector points a person has on their body
 		private const NUM_BODY_POINTS:int = 4;
 		
 		// Width of a picture from the security camera
 		private const PIC_WIDTH:Number = 1280;
+		
+		// centimeter conversion factor
+		private const CENTIMETERS:Number = 100;
 		
 		  ///////////////////////////
 		 //// Regular Variables ////
@@ -263,7 +269,7 @@ package screens
 				}
 			}
 			
-			//loadCalibrationSettings();
+			loadCalibrationSettings();
 			
 			// add the text field to the screen
 			addChild(textField);
@@ -315,7 +321,7 @@ package screens
 										
 										// trace("CENTERPOINTS " + centerPoint[index] + " at index " + index);
 										
-										
+										/*
 										// If the user hasn't calibrated, then we're going to force them to
 										if(centerPoint[index] == 0 || !centerPoint[index]) {
 											trace("CALIB");
@@ -323,10 +329,10 @@ package screens
 											textField.text = "Beginning calibration, please select the center";
 											setCenter(t, index);
 										}
-										else { 
+										else {*/ 
 											//trace("human assist called");
 											humanAssist(t);
-										}
+										//}
 										
 										// Display saved center poitns
 										/*
@@ -689,6 +695,7 @@ package screens
 			
 			// If the click is the last picture and the last point then go calculate all the rays
 			// -1 b/c index is 0 to numthumnails - 1
+			
 			if(bodyIndex == NUM_BODY_POINTS && index == (numThumbNails - 1)) {
 				trace("GOING INTO RAY CALC");
 				rayCalc();
@@ -756,8 +763,11 @@ package screens
 					
 					threeDPosition[index][threeDIndex] = pointOfClosestApproach;
 					threeDIndex++;
+					
+					
 				}
 			}	
+			savePoints();
 			trace("Finished");
 		}		
 		
@@ -1331,6 +1341,23 @@ package screens
 			camera3.z = cam_3_coords[2];
 		}
 		
+		private function savePoints():void {
+			//threeDPosition[index][threeDIndex]
+			
+			// reference the correct file
+			file = File.desktopDirectory.resolvePath(COORD_PATH);
+			
+			// open the file
+			filestream.open(file, FileMode.WRITE);
+			
+			// write to the file
+			for (var i:int = 0; i < 4; i++) {
+				filestream.writeUTFBytes((threeDPosition[1][i].x * CENTIMETERS)+ "," + (threeDPosition[1][i].y * CENTIMETERS) + "," + (threeDPosition[1][i].z * CENTIMETERS) + "\r\n");
+			}
+			
+			// close the file
+			filestream.close();
+		}
 		
 		private function writeCalibrationSettings():void {
 			
@@ -1342,15 +1369,42 @@ package screens
 			
 			// write values
 			for (var i:int = 0; i < 2; i++) {
-				
-				filestream.writeUTFBytes("camera" + (i+1) + ":\r\n");
-				filestream.writeUTFBytes("left:" + calibStep[i][0] + "\r\n");
-				filestream.writeUTFBytes("right:" + calibStep[i][1] + "\r\n");
-				filestream.writeUTFBytes("top:" + calibStep[i][3] + "\r\n");
-				filestream.writeUTFBytes("bottom:" + calibStep[i][4] + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_left_res:" + calibStep[i][0] + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_right_res:" + calibStep[i][1] + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_top_res:" + calibStep[i][3] + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_bottom_res:" + calibStep[i][4] + "\r\n");
 			}
 			
-			//TODO: Save more settings
+//			private var centerPoint:Array;		// 1D
+//			private var calibXPoints:Array;		// 2D	[Picture index][X] ; 0 = left, 1 = right
+//			private var calibYPoints:Array;		// 2D	[Picture index][X] ; 0 = top, 1 = bottom
+//			private var calibMPoints:Array;		// 2D	[Picture index][X] ; 0 = top left, 1 = bottom left, 2 = bottom right, 3 = top right ; Makes a U
+			
+			// write center points
+			filestream.writeUTFBytes("cam1_center:" + centerPoint[0].x + "," + centerPoint[0].y + "\r\n");
+			filestream.writeUTFBytes("cam2_center:" + centerPoint[1].x + "," + centerPoint[1].y + "\r\n");
+			
+			// write x points
+			filestream.writeUTFBytes("cam1_x_left:" + calibXPoints[0][0].x + "," + calibXPoints[0][0].y + "\r\n");
+			filestream.writeUTFBytes("cam1_x_right:" + calibXPoints[0][1].x + "," + calibXPoints[0][1].y + "\r\n");
+			filestream.writeUTFBytes("cam2_x_left:" + calibXPoints[1][0].x + "," + calibXPoints[1][0].y + "\r\n");
+			filestream.writeUTFBytes("cam2_x_right:" + calibXPoints[1][1].x + "," + calibXPoints[1][1].y + "\r\n");
+			
+			// write y points
+			filestream.writeUTFBytes("cam1_y_top:" + calibYPoints[0][0].x + "," + calibYPoints[0][0].y + "\r\n");
+			filestream.writeUTFBytes("cam1_y_bottom:" + calibYPoints[0][1].x + "," + calibYPoints[0][1].y + "\r\n");
+			filestream.writeUTFBytes("cam2_y_top:" + calibYPoints[1][0].x + "," + calibYPoints[1][0].y + "\r\n");
+			filestream.writeUTFBytes("cam2_y_bottom:" + calibYPoints[1][1].x + "," + calibYPoints[1][1].y + "\r\n");
+			
+			// write diagonal points
+			filestream.writeUTFBytes("cam1_m_topleft:" + calibMPoints[0][0].x + "," + calibMPoints[0][0].y + "\r\n");
+			filestream.writeUTFBytes("cam1_m_bottomleft:" + calibMPoints[0][1].x + "," + calibMPoints[0][1].y + "\r\n");
+			filestream.writeUTFBytes("cam1_m_bottomright:" + calibMPoints[0][2].x + "," + calibMPoints[0][2].y + "\r\n");
+			filestream.writeUTFBytes("cam1_m_topright:" + calibMPoints[0][3].x + "," + calibMPoints[0][3].y + "\r\n");
+			filestream.writeUTFBytes("cam2_m_topleft:" + calibMPoints[1][0].x + "," + calibMPoints[1][0].y + "\r\n");
+			filestream.writeUTFBytes("cam2_m_bottomleft:" + calibMPoints[1][1].x + "," + calibMPoints[1][1].y + "\r\n");
+			filestream.writeUTFBytes("cam2_m_bottomright:" + calibMPoints[1][2].x + "," + calibMPoints[1][2].y + "\r\n");
+			filestream.writeUTFBytes("cam2_m_topright:" + calibMPoints[1][3].x + "," + calibMPoints[1][3].y + "\r\n");
 			
 			// close the filestream
 			filestream.close();
@@ -1358,43 +1412,78 @@ package screens
 		
 		
 		private function loadCalibrationSettings():void {
-			/*
-			// calibStep[picture#][X] - resolution distances m to pix conversions
-			// X = {
-			// 0 = left,
-			// 1 = right,
-			// 3 = top,
-			// 4 = bottom }
-			private var calibStep:Array;*/
-			
+
+			// reference the correct file and open it
 			file = File.desktopDirectory.resolvePath(CALIB_PATH);
 			filestream.open(file, FileMode.READ);
 			
 			// get every line of the file
 			var lines:Array = filestream.readUTFBytes(filestream.bytesAvailable).split("\r\n");
 			
+			// temporary variables
 			var tempvals:Array;
 			var values:Array = new Array();
 			
+			// get the values on each line
 			for (var i:int = 0; i < lines.length-1; i++) {
 				tempvals = lines[i].split(":");
 				values[i] = tempvals[1];
 				
 			}
 			
-			//TODO: Load more settings
-			
 			// load picture 1 calibrations
-			calibStep[0][0] = values[1];
-			calibStep[0][1] = values[2];
-			calibStep[0][3] = values[3];
-			calibStep[0][4] = values[4];
-
+			calibStep[0][0] = values[0];
+			calibStep[0][1] = values[1];
+			calibStep[0][3] = values[2];
+			calibStep[0][4] = values[3];
+			
 			// load picture 2 calibrations
-			calibStep[1][0] = values[6];
-			calibStep[1][1] = values[7];
-			calibStep[1][3] = values[8];
-			calibStep[1][4] = values[9];
+			calibStep[1][0] = values[4];
+			calibStep[1][1] = values[5];
+			calibStep[1][3] = values[6];
+			calibStep[1][4] = values[7];
+			
+			// set an index to use
+			var val_index:int = 8;
+			
+			// load center point
+			for(i = 0; i < 2; i++) {
+				tempvals = values[val_index++].split(",");
+				centerPoint[i] = new Point(tempvals[0], tempvals[1]);
+			}
+			
+			//			private var centerPoint:Array;		// 1D
+			//			private var calibXPoints:Array;		// 2D	[Picture index][X] ; 0 = left, 1 = right
+			//			private var calibYPoints:Array;		// 2D	[Picture index][X] ; 0 = top, 1 = bottom
+			//			private var calibMPoints:Array;		// 2D	[Picture index][X] ; 0 = top left, 1 = bottom left, 2 = bottom right, 3 = top right ; Makes a U
+			
+			
+			// load X points
+			for (i = 0; i < 2; i++) {
+				for (var j:int = 0; j < 2; j++) {
+					tempvals = values[val_index++].split(",");
+					calibXPoints[i][j] = new Point(tempvals[0], tempvals[1]);
+				}
+			}
+			
+			// load Y points
+			for (i = 0; i < 2; i++) {
+				for (j= 0; j < 2; j++) {
+					tempvals = values[val_index++].split(",");
+					calibYPoints[i][j] = new Point(tempvals[0], tempvals[1]);
+				}
+			}
+			
+			// load M points
+			for (i = 0; i < 2; i++) {
+				for (j = 0; j < 4; j++) {
+					tempvals = values[val_index++].split(",");
+					calibMPoints[i][j] = new Point(tempvals[0], tempvals[1]);
+				}
+			}
+			
+			// close the file
+			filestream.close();
 		}
 	}
 }

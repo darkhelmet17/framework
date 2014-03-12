@@ -63,7 +63,7 @@ package screens
 		
 		
 		// coordinates.txt file path
-		public static const SETTINGS_PATH:String = "C:/SAS Data/coordinates.txt";
+		public static const COORDS_PATH:String = "C:/SAS Data/coordinates.txt";
 		
 		// Array to simulate passed in points
 		private var arrayData:Array;
@@ -138,6 +138,8 @@ package screens
 			stage3DProxy = Feathers_Test2.stage3DProxy;
 			stage3DManager = Feathers_Test2.stage3DManager;
 
+			filestream = new FileStream();
+			
 			// check window for existing objects and remove them
 			checkWindow();
 			
@@ -320,7 +322,8 @@ package screens
 			var start:Vector3D = new Vector3D();
 			var end:Vector3D = new Vector3D();
 			var count:Number = 0;								//Used to keep tabs on point numbers	
-			var numPoints:Number = arrayData.length;  
+			var numPoints:Number = arrayData.length-1;
+			trace(numPoints);
 			var midPointArray:Array = new Array();
 			
 			// Quick error check
@@ -331,7 +334,7 @@ package screens
 			//for(var i:Number=0; i < numPoints-1; i++){						// iffy with the -1 thing
 			//For every other two points draw a line between them
 			
-			for(var i:int = 0; i < arrayData.length; i++){
+			for(var i:int = 0; i < numPoints; i++){
 				
 				// Extract point data for the next 2 points that will be connected
 				var t:Array = arrayData[i].split(",");
@@ -398,37 +401,17 @@ package screens
 		}
 		
 		
-		/*
-		* Description : 
-		*		Accessess the existing file coordinates.txt, and returns an Array of Strings,
-		*		where each String corresponds to a line in the file.
-		*		
-		*
-		*/
-		private function getFileData():Array 
-		{
-			// set the file and open the filestream
-			var coordinates_file:File = File.desktopDirectory.resolvePath(SETTINGS_PATH);
-			var filestream:FileStream = new FileStream();
-			filestream.open(coordinates_file, FileMode.READ);
-			
-			// get all lines within the file
-			var lines:Array = filestream.readUTFBytes(filestream.bytesAvailable).split("\n");
-			
-			filestream.close();
-			return lines;
-		}
-		
-		
 		/* 
 		* Description : 
 		*		Calls getFileData and puts the data into a private class variable 
 		*/
 		private function iniArray():void
 		{
-			var  j:int = 0; 
-			arrayData = new Array();
-			arrayData = getFileData();
+			coordinates_file = File.desktopDirectory.resolvePath(COORDS_PATH);
+			filestream.open(coordinates_file, FileMode.READ);
+			arrayData = filestream.readUTFBytes(filestream.bytesAvailable).split("\r\n");
+			
+			trace(arrayData);
 		}
 		
 		
@@ -439,8 +422,8 @@ package screens
 		private function iniMarkers():void
 		{
 			// write each value from file into array of values
-			for(var i:int = 0; i < arrayData.length; i++){
-				var point = new Mesh(new SphereGeometry(10,50,50));
+			for(var i:int = 0; i < arrayData.length-1; i++){
+				var point:* = new Mesh(new SphereGeometry(10,50,50));
 				var tempvals:Array = arrayData[i].split(",");
 				point.x = tempvals[0];
 				point.y = tempvals[1];
@@ -492,10 +475,10 @@ package screens
 			//SphereGeometry(radius:Number = 50, segmentsW:uint = 16, segmentsH:uint = 12, yUp:Boolean = true)
 			
 			// change this to adjust marker diameters
-			var reflectorDia = 10; 
+			var reflectorDia:* = 10; 
 			
 			// GREEN MARKER 1
-			var markerGreen = new Mesh(new SphereGeometry(reflectorDia,50,50));
+			var markerGreen:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
 			markerGreen.x = 0;
 			markerGreen.y = 0;
 			markerGreen.z = 0;
@@ -511,7 +494,7 @@ package screens
 			away3dView.scene.addChild(markerGreen);
 			
 			// RED MARKER 2
-			var markerRed = new Mesh(new SphereGeometry(reflectorDia,50,50));
+			var markerRed:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
 			markerRed .x = 500;
 			markerRed .y = 0;
 			markerRed .z = 0;
@@ -526,7 +509,7 @@ package screens
 			
 			
 			// Dark BLUE MARKER 3
-			var markerBlue = new Mesh(new SphereGeometry(reflectorDia,50,50));
+			var markerBlue:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
 			markerBlue.x = -500;
 			markerBlue.y = 0;
 			markerBlue.z = 0;
@@ -540,7 +523,7 @@ package screens
 			away3dView.scene.addChild(markerBlue);		
 			
 			// VIOLET MARKER 4
-			var markerViolet = new Mesh(new SphereGeometry(reflectorDia,50,50));
+			var markerViolet:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
 			markerViolet.x = 0;
 			markerViolet.y = 0;
 			markerViolet.z = -500;
@@ -551,7 +534,7 @@ package screens
 			
 			
 			// LIGHTBLUE MARKER 5
-			var markerLBlue = new Mesh(new SphereGeometry(reflectorDia,50,50));
+			var markerLBlue:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
 			markerLBlue.x = 0;
 			markerLBlue.y = 0;
 			markerLBlue.z = 500;
@@ -561,7 +544,7 @@ package screens
 			away3dView.scene.addChild(markerLBlue);		
 			
 			// WHITE MARKER 6
-			var markerWhite = new Mesh(new SphereGeometry(10,50,50));
+			var markerWhite:* = new Mesh(new SphereGeometry(10,50,50));
 			markerWhite.x = 0;
 			markerWhite.y = 500;
 			markerWhite.z = 0;
@@ -645,7 +628,7 @@ package screens
 		private function iniFloor():void
 		{
 			// var floor = new Mesh(new PlaneGeometry(2000,2000));
-			var cylinder = new Mesh(new CylinderGeometry(500,600,10,50));
+			var cylinder:* = new Mesh(new CylinderGeometry(500,600,10,50));
 			//cylinder.pivotX = cylinde; // centers
 			cylinder.x = 0; // in the middle
 			cylinder.y = -500; // trail and error
