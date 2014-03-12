@@ -116,9 +116,8 @@ package screens
 		
 		private var numThumbNails:int = 0;
 		
-		// Holds the distances between the dots in the coresponding direction in meters : W is the distance to the edge of the board
-		// Unsure about the 30.5
-		private var calibrator:Vector3D = new Vector3D(0.25, 0.2, 0);
+		// Holds the distances between the dots in the coresponding direction in meters (z coordinate unused)
+		private var calibrator:Vector3D;
 		
 		// vectors for holding camera coordinates
 		private var camera1:Vector3D;
@@ -182,6 +181,10 @@ package screens
 			camera1 = new Vector3D();
 			camera2 = new Vector3D();
 			camera3 = new Vector3D();
+			
+			// instantiate calibrator vector that holds reflector distances
+			calibrator = new Vector3D();
+			calibrator.z = 0; // unused
 			
 			// initialize reflector point variables
 			left_shoulder = new Point();
@@ -1322,27 +1325,34 @@ package screens
 		
 		
 		private function loadCameraSettings():void {
+			
+			// get each line of the file
 			var lines:Array = SettingsScreen.readSettingsFile();
 			
-			var cam_1_coords:Array = lines[0].split(",");
-			var cam_2_coords:Array = lines[1].split(",");
-			var cam_3_coords:Array = lines[1].split(",");
+			// split camera 1 coordinates into separate values
+			var cam_coords:Array = lines[0].split(",");
+			camera1.x = cam_coords[0];
+			camera1.y = cam_coords[1];
+			camera1.z = cam_coords[2];
 			
-			camera1.x = cam_1_coords[0];
-			camera1.y = cam_1_coords[1];
-			camera1.z = cam_1_coords[2];
+			// split camera 2 coordinates into separate values
+			cam_coords = lines[1].split(",");
+			camera2.x = cam_coords[0];
+			camera2.y = cam_coords[1];
+			camera2.z = cam_coords[2];
 			
-			camera2.x = cam_2_coords[0];
-			camera2.y = cam_2_coords[1];
-			camera2.z = cam_2_coords[2];
+			// split camera 3 coordinates into separate values
+			cam_coords = lines[2].split(",");
+			camera3.x = cam_coords[0];
+			camera3.y = cam_coords[1];
+			camera3.z = cam_coords[2];
 			
-			camera3.x = cam_3_coords[0];
-			camera3.y = cam_3_coords[1];
-			camera3.z = cam_3_coords[2];
+			// set calibrator values
+			calibrator.x = lines[3];
+			calibrator.y = lines[4];
 		}
 		
 		private function savePoints():void {
-			//threeDPosition[index][threeDIndex]
 			
 			// reference the correct file
 			file = File.desktopDirectory.resolvePath(COORD_PATH);
