@@ -410,8 +410,7 @@ package screens
 			coordinates_file = File.desktopDirectory.resolvePath(COORDS_PATH);
 			filestream.open(coordinates_file, FileMode.READ);
 			arrayData = filestream.readUTFBytes(filestream.bytesAvailable).split("\r\n");
-			
-			trace(arrayData);
+			filestream.close();
 		}
 		
 		
