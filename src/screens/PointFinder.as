@@ -1,6 +1,6 @@
-
 package screens
 {
+	// import flash packages
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
@@ -11,6 +11,7 @@ package screens
 	import flash.geom.Rectangle;
 	import flash.geom.Vector3D;
 	
+	// import feathers packages
 	import feathers.controls.Button;
 	import feathers.controls.ImageLoader;
 	import feathers.controls.LayoutGroup;
@@ -19,6 +20,7 @@ package screens
 	import feathers.layout.HorizontalLayout;
 	import feathers.layout.VerticalLayout;
 	
+	// import starling packages
 	import starling.core.RenderSupport;
 	import starling.core.Starling;
 	import starling.display.Image;
@@ -28,6 +30,9 @@ package screens
 	import starling.events.TouchPhase;
 	import starling.text.TextField;
 	import starling.textures.Texture;
+	
+	//----------------------------------------------------------------------------------------//
+	//----------------------------------------------------------------------------------------//
 	
 	public class PointFinder extends Screen {
 		
@@ -114,10 +119,10 @@ package screens
 		// variable for keeping track of which reflector state we are in
 		private var state:Number;
 		
-		private var numThumbNails:int = 0;
+		// variable used to keep track of how many pictures there are
+		private var numThumbNails:int;
 		
 		// Holds the distances between the dots in the coresponding direction in meters : W is the distance to the edge of the board
-		// Unsure about the 30.5
 		private var calibrator:Vector3D = new Vector3D(0.25, 0.2, 0);
 		
 		// vectors for holding camera coordinates
@@ -165,12 +170,15 @@ package screens
 		//     Functions     //
 		///////////////////////
 		
+		//----------------------------------------------------------------------------------------//
+		//----------------------------------------------------------------------------------------//
 		
 		/**
 		 * Constructor
 		 */
 		public function PointFinder() {
 			
+			// instantiate file stream
 			filestream = new FileStream();
 			
 			// create layout objects
@@ -203,7 +211,7 @@ package screens
 			// set initial state
 			state = 0;
 			
-			// ??
+			// initialize complete flag to false
 			complete = false;
 			
 			// create textField
@@ -223,6 +231,9 @@ package screens
 			// set camera coordinates
 			loadCameraSettings();
 			
+			// initialize numthumbnails
+			numThumbNails = 0;
+			
 			// Add the mouse click event
 			this.addEventListener(TouchEvent.TOUCH, onTouch);
 			bCalib.addEventListener(starling.events.Event.TRIGGERED, startCalibrate);
@@ -240,15 +251,13 @@ package screens
 			// Load Pictures from the file path
 			loadPictures();
 			
-			// REMOVE
-			numThumbNails = 2;
-			
 			// Initilize the thumbbnails
 			initThumbbnails();
 			
+			/*
 			for(var i:int = 0; i < numThumbNails; i++) {
 				centerPoint[i] = 0;
-			}
+			}*/
 			
 			// Initilize 2d arrays
 			for(var k:int = 0; k < numThumbNails; k++)  { 
@@ -269,6 +278,7 @@ package screens
 				}
 			}
 			
+			// load the calibration settings, if there are any
 			loadCalibrationSettings();
 			
 			// add the text field to the screen
@@ -297,63 +307,40 @@ package screens
 						
 						// If in calibration mode
 						if(isCalibrating) {
-							// If inside the main image x-wise
-							if(t.globalX > -X_SCALE) {
-								// If inside the main image y-wise
-								if(t.globalY > -Y_SCALE) {
-									// Let's calibrate (find the middle image)
-									calibrate(t, index);	
-								}
+							
+							// If inside the main image
+							if(t.globalX > -X_SCALE && t.globalY > -Y_SCALE) {
+									
+								// Let's calibrate (find the middle image)
+								calibrate(t, index);	
 							}	
 						}
+						
 						// not calibrating
 						else {
+							
 							// If the mouse moved < 10 then do not change the picture AKA user was scrolling the container
 							if(Math.abs(t.globalX - touchBeginX) < 10) {
 								if(Math.abs(t.globalY - touchBeginY) < 10) {
-									// trace("Target Name " + t.target.name);
 									
 									// update the instructions to the user - moved to the top b/c calibration textfield in centerpoint
 									updateInstructions();
 									
-									// user clicked main image
-									if(t.target.name == "mainImage") {
-										
-										// trace("CENTERPOINTS " + centerPoint[index] + " at index " + index);
-										
-										/*
-										// If the user hasn't calibrated, then we're going to force them to
-										if(centerPoint[index] == 0 || !centerPoint[index]) {
-											trace("CALIB");
-											isCalibrating = true;
-											textField.text = "Beginning calibration, please select the center";
-											setCenter(t, index);
-										}
-										else {*/ 
-											//trace("human assist called");
+									// user clicked somewhere in the main image
+									if(t.target.name == "mainImage")
 											humanAssist(t);
-										//}
-										
-										// Display saved center poitns
-										/*
-										for(var i:int = 0; i < numThumbNails; i++)
-										trace(centerPoint[i]);
-										*/	
-									}
+								
 									else {
+										
 										// Make sure the user isn't touching the container of thumbnails or somewhere else invalid
 										if(t.target.name != null) {
+											
 											// Dynamically get the thumbnail clicked
 											index = int(t.target.name.substring(t.target.name.length - 1, t.target.name.length));
 											mainImage = imageArray[index];
 											state = 0;
 										}
 									}
-									
-									// set correct sizes of the image
-									//mainImage.maintainAspectRatio = false;
-									//mainImage.width = mainImageContainer.width;
-									//mainImage.height = mainImageContainer.height;
 									
 									// add the image to the container
 									mainImageContainer.addChild(mainImage);
@@ -366,6 +353,9 @@ package screens
 		}
 		
 		
+		/**
+		 * Function to set the "center" of the image
+		 */
 		private function setCenter(target:Touch, index:int):int {
 			var point:Point = findCenter(target);
 			
@@ -390,8 +380,8 @@ package screens
 		private function findCenter(target:Touch):Point {
 			// Get location of mouse click
 			var location:Point = new Point(target.globalX + X_SCALE, target.globalY + Y_SCALE);
-			// trace("coordinates - x: " + location.x + ", y: " + location.y);
 			
+			// get the bitmap data
 			var bmd:BitmapData = copyAsBitmapData(mainImage);
 			
 			// variables used to calculate average positions of pixels
@@ -416,10 +406,12 @@ package screens
 			var x:Number = sumXCoords/totalPixels;
 			var y:Number = sumYCoords/totalPixels;
 			
+			// create the point and return it
 			var point:Point = new Point(x,y);
 			
 			return point;
 		}
+		
 		
 		/**
 		 * Loads each picture into a sized down thumbbnail version of it into the scrolling container
@@ -486,6 +478,7 @@ package screens
 		 *  Take note of the file extensions acceptable by the program
 		 */
 		private function loadPictures():void {
+			
 			// get all images in the image directory
 			var folder:File = File.applicationDirectory.resolvePath(IMAGE_PATH);
 			var fileArray:Array = folder.getDirectoryListing();
@@ -520,11 +513,6 @@ package screens
 			
 			// set the main image to the first element of the image array
 			mainImage = imageArray[0];
-			
-			// ensure that the sizes are correct
-			//mainImage.maintainAspectRatio = false;
-			//mainImage.width = mainImageContainer.width;
-			//mainImage.height = mainImageContainer.height;
 			
 			// add image to the main image container
 			mainImageContainer.addChild(mainImage);
@@ -567,7 +555,6 @@ package screens
 			
 			// Get location of mouse click
 			var location:Point = new Point(target.globalX + X_SCALE, target.globalY + Y_SCALE);
-			// trace("coordinates - x: " + location.x + ", y: " + location.y);
 			
 			// circle sprite to be drawn around desired area
 			var circle:Sprite = new Sprite();
@@ -578,6 +565,7 @@ package screens
 			
 			// Check pixels in 100x100 pixel box around the mouse position at the time it was clicked
 			for (var i:uint = location.x - BOUNDS; i < location.x + BOUNDS; i++) {
+				
 				for (var j:uint = location.y - BOUNDS; j < location.y + BOUNDS; j++){
 					
 					// If "brightness" is greater than a certain amount, color that pixel red
@@ -590,13 +578,9 @@ package screens
 				}
 			}
 			
-			// trace("done finding bright pixels");
-			
 			// calculate the center of the circle
 			x = sumXCoords/totalPixels;
 			y = sumYCoords/totalPixels;
-			
-			// trace("finding avg width");
 			
 			/* find the average width of the hilighted area  */
 			
@@ -629,7 +613,7 @@ package screens
 			avgWidth = widths/rows;
 			
 			/* find the average height of the hilighted area */
-			// trace("finding avg height");
+
 			// loop through each column first
 			for (j = location.y - BOUNDS; j < location.y + BOUNDS; j++) {
 				
@@ -660,7 +644,6 @@ package screens
 			
 			// average the width and height together to get the radius
 			radius = (avgWidth + avgHeight)/2;
-			// trace("drawing circle");
 			
 			// draw the circle around the reflector
 			circle.graphics.clear();
@@ -670,21 +653,14 @@ package screens
 			circle.graphics.endFill();
 			bmd.draw(circle);
 			
-			// update text field
-			//textField.text = "Radius = " + radius;
-			
 			// Invalid reflector selection
 			if(updateStateAfterClick(x, y, bmd) == -1) {
-				trace("invliad reflector");
 				return;
 			}
-			
-			// trace("updating image");
 			
 			// Store all the values of the points
 			var p:Point = new Point(x, y);
 			bodyPoints[index][bodyIndex] = p;
-			trace("POINT " + bodyIndex + " " + bodyPoints[index][bodyIndex].x + " " + bodyPoints[index][bodyIndex].y);
 			bodyIndex++;
 			
 			// Update image
@@ -696,41 +672,42 @@ package screens
 			// If the click is the last picture and the last point then go calculate all the rays
 			// -1 b/c index is 0 to numthumnails - 1
 			
-			if(bodyIndex == NUM_BODY_POINTS && index == (numThumbNails - 1)) {
-				trace("GOING INTO RAY CALC");
+			if(bodyIndex == NUM_BODY_POINTS && index == (numThumbNails - 1)) 
 				rayCalc();
-			}
 			
 			if(bodyIndex == NUM_BODY_POINTS) {
+				
 				// Reset counter and go the next picture
 				bodyIndex = 0;
 				nextImage();
 			}		
 			
 			// Update thumbbnail - not sure why this is commented out
-			//thumbnailArray[index].source = Texture.fromBitmapData(bmd);
+			thumbnailArray[index].source = Texture.fromBitmapData(bmd);
 		}
 		
 		
-		// Closest approach algorithm - http://paulbourke.net/geometry/pointlineplane/
+		/** 
+		 * Closest approach algorithm - http://paulbourke.net/geometry/pointlineplane/
+		 * 
+		 * */
 		private function rayCalc():void {
+			
+			// set initial index
 			threeDIndex = 0;
-			//var centerX:Number = centerPoint[index].x;
-			//var centerY:Number = centerPoint[index].y;
 			
 			// For each picture pair
 			for(var i:int = 0; i < numThumbNails; i += 2) {
+				
 				// Compare all points
 				for(var j:int = 0; j < NUM_BODY_POINTS; j++) {
-					// Eqution r1 = r1 + v1t
+					
+					/** Eqution r1 = r1 + v1t */
 					
 					// Create second points
 					// p in the equation
 					var point1:Vector3D = createPoint(index, j);
 					var point2:Vector3D = createPoint(index, j);
-					
-					trace("1 point " + x + " pixels -> " + point1.x + "cms from center : Coordinte " + point1);
-					trace("2 point " + x + " pixels -> "  + point2.x + " cms from center : Coordinate " + point2);
 					
 					// Create first rays
 					// r in the equation
@@ -750,25 +727,19 @@ package screens
 					var lhs:Vector3D = camera1.subtract(camera2);
 					var rhs:Vector3D = r2.subtract(r1);
 					
-					trace("p1 " + point1);
-					trace("p2 " + point2);
-					trace("r1 " + r1);
-					trace("r2 " + r2);
-					trace("lhs " + lhs);
-					trace("rhs " + rhs);
-					
+					// calculate the point of closest approach
 					var pointOfClosestApproach:Vector3D = findClosestApproach(rhs, lhs, r1, point1);
 					
-					trace("Resulting point = " + pointOfClosestApproach);
-					
+					// add the point to our matrix and increment the index
 					threeDPosition[index][threeDIndex] = pointOfClosestApproach;
 					threeDIndex++;
 					
 					
 				}
 			}	
+			
+			// save our calculated points to the file
 			savePoints();
-			trace("Finished");
 		}		
 		
 		
@@ -776,6 +747,7 @@ package screens
 		 * Ray and point MUST corespond to the same equation!
 		 */
 		private function findClosestApproach(rhs:Vector3D, lhs:Vector3D, ray:Vector3D, point:Vector3D):Vector3D {
+			
 			// Sentiel values to be used on the first compare, values don't matter as long as they're large values
 			// In this case 100m for all directions
 			var minVect:Vector3D = new Vector3D(100,100,100);
@@ -796,7 +768,6 @@ package screens
 					minVect = tempVect;
 					minT = t;
 				}
-				// trace(Math.sqrt(tempVect.lengthSquared) + " " + Math.sqrt(minVect.lengthSquared) + " " + minT);
 			}	
 			
 			// After t is calculated plug back into d = p - rt  
@@ -811,6 +782,9 @@ package screens
 		}
 		
 		
+		/**
+		 * Function creates a ray (normalized) from a camera to a point in a picture
+		 */
 		private function createRay(point:Vector3D, camera:Vector3D, magnitude:Number):Vector3D {
 			var ray:Vector3D = new Vector3D();
 			
@@ -822,6 +796,9 @@ package screens
 		}
 		
 		
+		/**
+		 * Function creats a point seen in a picture
+		 */
 		private function createPoint(index:int, j:int):Vector3D {
 			var centerX:Number = centerPoint[index].x;
 			var centerY:Number = centerPoint[index].y;
@@ -837,18 +814,21 @@ package screens
 		}
 		
 		
+		/**
+		 * Function to calculate the magnitude of a vector
+		 */
 		private function calcMagnatude(point:Vector3D, camera:Vector3D):Number {
 			var mx:Number = Math.pow(point.x - camera.x, 2);
 			var my:Number = Math.pow(point.y - camera.y, 2);
 			var mz:Number = Math.pow(point.z - camera.z, 2);
 			
-			var magnitude:Number = Math.sqrt(mx + my + mz);
-			trace("Mag " + magnitude + " " + mx + " " + my + " " +mz);
-			
-			return magnitude;
+			return Math.sqrt(mx + my + mz);
 		}
 		
 		
+		/**
+		 * Function to find the slope
+		 */
 		private function findM(point:Number, index:int, direction:String):Number {
 			// calibstep[picture#][X]
 			// X = 
@@ -884,7 +864,6 @@ package screens
 			// Check if the coordinates are valid
 			if (x > 0 && y > 0) {
 				
-				
 				// assign point locations based on state
 				switch (state) {
 					
@@ -894,8 +873,6 @@ package screens
 						// set the coordinates
 						left_shoulder.x = x;
 						left_shoulder.y = y;
-						
-						
 						break;
 					
 					// case 1 means right shoulder reflector
@@ -927,6 +904,7 @@ package screens
 						// draw a line now that we have two points in common
 						drawLine(left_hip, right_hip);
 						break;
+					
 					default:
 						break;
 				}
@@ -934,13 +912,12 @@ package screens
 				// update the state
 				if (++state == 4)
 					state = 0;
-				
-				
-				
+
 				// update the instructions based on the new state
 				updateInstructions();
 			}
-				// location not valid
+			
+			// location not valid
 			else {
 				textField.text = "There is no reflector at that location.  Please try again.";
 				return -1;
@@ -948,22 +925,35 @@ package screens
 			
 			// internal function for drawing line between two points
 			function drawLine(p1:Point, p2:Point):void {
+				
+				// create a new line
 				var line:Sprite = new Sprite();
 				line.graphics.clear();
 				line.graphics.beginFill(BLUE, 1.0);
 				line.graphics.lineStyle(3, BLUE);
 				line.graphics.moveTo(p1.x, p1.y);
 				line.graphics.lineTo(p2.x, p2.y);
+				
+				// draw the line
 				bmd.draw(line);
 				
+				// if we're done finding points in this image
 				if(complete) {
+					
+					// create a center line
 					var center:Sprite = new Sprite();
 					center.graphics.clear();
 					center.graphics.beginFill(BLUE, 1.0);
 					center.graphics.lineStyle(3, BLUE);
+					
+					// set endpoints of the line to be the midpoint between the shoulder and hip points
 					center.graphics.moveTo( (right_shoulder.x + left_shoulder.x)/2, (right_shoulder.y + left_shoulder.y)/2);
 					center.graphics.lineTo( (right_hip.x + left_hip.x)/2, (right_hip.y + left_hip.y)/2);
+					
+					// draw the line
 					bmd.draw(center);
+					
+					// reset boolean variable
 					complete = false;
 				}
 			}
@@ -1001,18 +991,6 @@ package screens
 				default:
 					break;
 			}
-		}
-		
-		
-		/**
-		 * Function to calculate pixel resolution based on mouse clicks
-		 */
-		private function calcRes(point1:Point, point2:Point):void {
-			var x:Number = Math.abs(point2.x - point1.x);
-			var y:Number = Math.abs(point2.y - point1.y);
-			
-			var res:Number = distance / x; // meters per pixel
-			textField.text = "resolution = " + (res * 1000) + " millimeters per pixel";
 		}
 		
 		
@@ -1064,13 +1042,21 @@ package screens
 		}
 		
 		
+		/**
+		 * Event listener for calibration button
+		 */
 		private function startCalibrate():void {
+			
+			// set boolean flag
 			isCalibrating = true;
 			
+			// update the text field
 			textField.text = "CALIBRATING: Please click the center dot";
 			
+			// set the index
 			index = 0;
 			
+			// start with the first image
 			mainImage = imageArray[0];
 			
 			// set correct sizes of the image
@@ -1083,21 +1069,31 @@ package screens
 		}
 		
 		
+		/**
+		 * Function to calibrate points in a picture
+		 */
 		private function calibrate(target:Touch, index:int):int {
+			
+			// switch on which stage of calibration we are in
 			switch(calibStage) {
 				case 0:
 					// If set center == -1 (got NaN) then return - the number doesn't matter, index doesn't increment
 					// Currently returns index, in case things change
 					if(setCenter(target, index) == -1)
 						return index;
+					
+					// update text field
 					textField.text = "Please select the top middle dot";
 					
+					// update the stage
 					calibStage++;
 					break;
+				
 				case 1:
 					if(calibrateY(target, index) == -1)
 						return index;
 					
+					// update text field
 					textField.text = "Please select the bottom middle dot";
 					
 					// Needs to do this 2x because 2 dots on the x-axis calibrator
@@ -1112,8 +1108,8 @@ package screens
 					if(calibrateX(target, index) == -1)
 						return index;
 					
+					// update text field
 					textField.text = "Please select the center right dot";
-					
 					
 					// Needs to do this 2x because 2 dots on the y-axis calibrator
 					if(calibIndex == 2) {
@@ -1127,6 +1123,7 @@ package screens
 					if(calibrateM(target, index) == -1)
 						return index;
 					
+					// update text field
 					textField.text = "Please select the top left dot";
 					
 					// Need to do this 4x because 4 dots for the m
@@ -1144,27 +1141,24 @@ package screens
 					
 					break;
 				default:
-					trace("Something went wrong with calibration");
+					textField.text = "Something went wrong with calibration.  Please start over";
 					return index;
-			}
-			
-			// trace("Stage # " + calibStage);
-			
-			
+			}	
 			
 			// Number of points = 8 on the calibrator
 			if(calibStage == 4) {
-				textField.text = "FIRST IMAGE CALIBRATION COMPLETE, PLEASE SELECT THE CENTER DOT";
+				textField.text = "First image calibration complete.  Please click on center dot";
 				
-				// calibrationCalculations();
-				
+				// reset the calibration stage
 				calibStage = 0;
 				
+				// update the currently displayed image
 				nextImage();
+				
+				// check if we're calibrating the last image
 				if(index == (numThumbNails - 1)) {
 					isCalibrating = false;
 					textField.text = "Calibration complete";
-					//return;
 					
 					// Do calculations for all the pictures
 					for(var k:int = 0; k < numThumbNails; k++)
@@ -1176,6 +1170,9 @@ package screens
 		}
 		
 		
+		/**
+		 * Function for actually doing the calibration calculations
+		 */
 		private function calibrationCalculations(index:int):void {
 			// Minus second one becasue 2nd number is negative b/c it's on the other side of the x axis... you know the negative side
 			
@@ -1185,20 +1182,17 @@ package screens
 			// 1 = right
 			// 3 = top
 			// 4 = bottom
+			
 			var vStep:Number = (centerPoint[index].x - calibXPoints[index][0].x) / calibrator.x;
 			calibStep[index][0] = 1 / vStep;
 			vStep = (centerPoint[index].x - calibXPoints[index][1].x) / calibrator.x;
 			calibStep[index][1] = 1 / vStep;
-			
-			// trace("vStep " + calibStep[index][0] + " " + calibStep[index][1]);
 			
 			// Top + bottom y distances / 2
 			var hStep:Number = (centerPoint[index].y - calibYPoints[index][0].y) / calibrator.y;
 			calibStep[index][3] = 1 / hStep;
 			hStep = (centerPoint[index].y - calibYPoints[index][1].y) / calibrator.y;
 			calibStep[index][4] = 1 / hStep;
-			
-			// trace("hStep " + calibStep[index][3] + " " + calibStep[index][4]);
 			
 			// How much image distortion there is by comparing slopes
 			// Top right with bottom left
@@ -1209,20 +1203,17 @@ package screens
 			m = (centerPoint[index].x - calibMPoints[index][0].x) / (centerPoint[index].y - calibMPoints[index][0].y); 
 			m1 = (centerPoint[index].x - calibMPoints[index][2].x) / (centerPoint[index].y - calibMPoints[index][2].y);
 			
-			// trace(m + " " + m1);
-			// trace("Differ in +m " + (m1 - m));
-			
 			m = (centerPoint[index].x - calibMPoints[index][3].x) / (centerPoint[index].y - calibMPoints[index][3].y);
 			m1 = (centerPoint[index].x - calibMPoints[index][1].x) / (centerPoint[index].y - calibMPoints[index][1].y);
-			
-			// trace(m + " " + m1);
-			// trace("Differ in -m " + (m1 - m));
 			
 			// write calibration settings to file
 			writeCalibrationSettings();
 		}
 		
 		
+		/**
+		 * Function for calibrating points on the diagonal
+		 */
 		private function calibrateM(target:Touch, index:int):int {
 			var point:Point = findCenter(target);
 			
@@ -1236,21 +1227,24 @@ package screens
 				else if(calibIndex == 3)
 					textField.text = "Error calibrating: Please select the bottom right";
 				else
-					trace("Something went wrong calibrating m");
+					textField.text = "Something went wrong.  Please start over";
 				
 				return index;
 			}
 			
+			// add the point to our matrix of diagonal points
 			calibMPoints[index][calibIndex] = point;
 			
-			// trace("M " + calibIndex + " " + point);
-			
+			// update the index
 			calibIndex++;
 			
 			return 0;
 		}
 		
 		
+		/**
+		 * Function for calibrating points on the vertical Axis
+		 */
 		private function calibrateY(target:Touch, index:int):int {
 			var point:Point = findCenter(target);
 			
@@ -1260,21 +1254,24 @@ package screens
 				else if(calibIndex == 1)
 					textField.text = "Error calibrating: Please select the center right";
 				else
-					trace("Something went wrong calibrating y");
+					textField.text = "Something went wrong.  Please start over";
 				
 				return index;
 			}
 			
+			// add the point to our matrix of vertical points
 			calibYPoints[index][calibIndex] = point;
 			
-			// trace("Y " + calibIndex + " " + point);
-			
+			// update index
 			calibIndex++;
 			
 			return 0;
 		}
 		
 		
+		/**
+		 * Function for calibrating points on the horizontal Axis
+		 */
 		private function calibrateX(target:Touch, index:int):int {
 			var point:Point = findCenter(target);
 			
@@ -1284,21 +1281,24 @@ package screens
 				else if(calibIndex == 1)
 					textField.text = "Error calibrating: Please select the bottom middle";
 				else
-					trace("Something went wrong calibrating x");
+					textField.text = "Something went wrong.  Please start over";
 				
 				return index;
 			}
 			
+			// add the point to our matrix of horizontal points
 			calibXPoints[index][calibIndex] = point;
 			
-			// trace("X " + calibIndex + " " + point);
-			
+			// update index
 			calibIndex++;
 			
 			return 0;
 		}
 		
 		
+		/**
+		 * Function to display the next image
+		 */
 		private function nextImage():void {
 			if(index == (numThumbNails - 1)) {
 				// For circular-ness
@@ -1311,36 +1311,44 @@ package screens
 			
 			mainImage = imageArray[index];
 			
-			// set correct sizes of the image
-			//mainImage.maintainAspectRatio = true;
-			//mainImage.width = mainImageContainer.width;
-			//mainImage.height = mainImageContainer.height;
-			
 			// add the image to the container
 			mainImageContainer.addChild(mainImage);
 		}
 		
 		
+		/**
+		 * Function to load coordinate settings of the cameras
+		 */
 		private function loadCameraSettings():void {
+			
+			// get all the lines from the file
 			var lines:Array = SettingsScreen.readSettingsFile();
 			
+			// split the lines we care about up based on ","
 			var cam_1_coords:Array = lines[0].split(",");
 			var cam_2_coords:Array = lines[1].split(",");
 			var cam_3_coords:Array = lines[1].split(",");
 			
+			// set camera 1 coordinates
 			camera1.x = cam_1_coords[0];
 			camera1.y = cam_1_coords[1];
 			camera1.z = cam_1_coords[2];
 			
+			// set camera 2 coordinates
 			camera2.x = cam_2_coords[0];
 			camera2.y = cam_2_coords[1];
 			camera2.z = cam_2_coords[2];
 			
+			// set camera 3 coordinates
 			camera3.x = cam_3_coords[0];
 			camera3.y = cam_3_coords[1];
 			camera3.z = cam_3_coords[2];
 		}
 		
+		
+		/**
+		 * Function to save the calculated points to a file
+		 */
 		private function savePoints():void {
 			//threeDPosition[index][threeDIndex]
 			
@@ -1359,6 +1367,10 @@ package screens
 			filestream.close();
 		}
 		
+		
+		/**
+		 * Functino to save the calibration settings to a file
+		 */
 		private function writeCalibrationSettings():void {
 			
 			// open the file
@@ -1367,7 +1379,7 @@ package screens
 			// open the filestream
 			filestream.open(file, FileMode.WRITE);
 			
-			// write values
+			// write resolution values
 			for (var i:int = 0; i < 2; i++) {
 				filestream.writeUTFBytes("cam" + (i+1) + "_left_res:" + calibStep[i][0] + "\r\n");
 				filestream.writeUTFBytes("cam" + (i+1) + "_right_res:" + calibStep[i][1] + "\r\n");
@@ -1375,42 +1387,39 @@ package screens
 				filestream.writeUTFBytes("cam" + (i+1) + "_bottom_res:" + calibStep[i][4] + "\r\n");
 			}
 			
-//			private var centerPoint:Array;		// 1D
-//			private var calibXPoints:Array;		// 2D	[Picture index][X] ; 0 = left, 1 = right
-//			private var calibYPoints:Array;		// 2D	[Picture index][X] ; 0 = top, 1 = bottom
-//			private var calibMPoints:Array;		// 2D	[Picture index][X] ; 0 = top left, 1 = bottom left, 2 = bottom right, 3 = top right ; Makes a U
-			
 			// write center points
-			filestream.writeUTFBytes("cam1_center:" + centerPoint[0].x + "," + centerPoint[0].y + "\r\n");
-			filestream.writeUTFBytes("cam2_center:" + centerPoint[1].x + "," + centerPoint[1].y + "\r\n");
+			for (i = 0; i < 2; i++) {
+				filestream.writeUTFBytes("cam" + (i+1) + "_center:" + centerPoint[i].x + "," + centerPoint[i].y + "\r\n");
+			}
 			
 			// write x points
-			filestream.writeUTFBytes("cam1_x_left:" + calibXPoints[0][0].x + "," + calibXPoints[0][0].y + "\r\n");
-			filestream.writeUTFBytes("cam1_x_right:" + calibXPoints[0][1].x + "," + calibXPoints[0][1].y + "\r\n");
-			filestream.writeUTFBytes("cam2_x_left:" + calibXPoints[1][0].x + "," + calibXPoints[1][0].y + "\r\n");
-			filestream.writeUTFBytes("cam2_x_right:" + calibXPoints[1][1].x + "," + calibXPoints[1][1].y + "\r\n");
+			for (i = 0; i < 2; i++) {
+				filestream.writeUTFBytes("cam" + (i+1) + "_x_left:" + calibXPoints[i][0].x + "," + calibXPoints[i][0].y + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_x_right:" + calibXPoints[i][1].x + "," + calibXPoints[i][1].y + "\r\n");
+			}
 			
 			// write y points
-			filestream.writeUTFBytes("cam1_y_top:" + calibYPoints[0][0].x + "," + calibYPoints[0][0].y + "\r\n");
-			filestream.writeUTFBytes("cam1_y_bottom:" + calibYPoints[0][1].x + "," + calibYPoints[0][1].y + "\r\n");
-			filestream.writeUTFBytes("cam2_y_top:" + calibYPoints[1][0].x + "," + calibYPoints[1][0].y + "\r\n");
-			filestream.writeUTFBytes("cam2_y_bottom:" + calibYPoints[1][1].x + "," + calibYPoints[1][1].y + "\r\n");
+			for (i = 0; i < 2; i++) {
+				filestream.writeUTFBytes("cam" + (i+1) + "_y_top:" + calibYPoints[i][0].x + "," + calibYPoints[i][0].y + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_y_bottom:" + calibYPoints[i][1].x + "," + calibYPoints[i][1].y + "\r\n");
+			}
 			
 			// write diagonal points
-			filestream.writeUTFBytes("cam1_m_topleft:" + calibMPoints[0][0].x + "," + calibMPoints[0][0].y + "\r\n");
-			filestream.writeUTFBytes("cam1_m_bottomleft:" + calibMPoints[0][1].x + "," + calibMPoints[0][1].y + "\r\n");
-			filestream.writeUTFBytes("cam1_m_bottomright:" + calibMPoints[0][2].x + "," + calibMPoints[0][2].y + "\r\n");
-			filestream.writeUTFBytes("cam1_m_topright:" + calibMPoints[0][3].x + "," + calibMPoints[0][3].y + "\r\n");
-			filestream.writeUTFBytes("cam2_m_topleft:" + calibMPoints[1][0].x + "," + calibMPoints[1][0].y + "\r\n");
-			filestream.writeUTFBytes("cam2_m_bottomleft:" + calibMPoints[1][1].x + "," + calibMPoints[1][1].y + "\r\n");
-			filestream.writeUTFBytes("cam2_m_bottomright:" + calibMPoints[1][2].x + "," + calibMPoints[1][2].y + "\r\n");
-			filestream.writeUTFBytes("cam2_m_topright:" + calibMPoints[1][3].x + "," + calibMPoints[1][3].y + "\r\n");
+			for (i = 0; i < 2; i++) {
+				filestream.writeUTFBytes("cam" + (i+1) + "_m_topleft:" + calibMPoints[i][0].x + "," + calibMPoints[i][0].y + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_m_bottomleft:" + calibMPoints[i][1].x + "," + calibMPoints[i][1].y + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_m_bottomright:" + calibMPoints[i][2].x + "," + calibMPoints[i][2].y + "\r\n");
+				filestream.writeUTFBytes("cam" + (i+1) + "_m_topright:" + calibMPoints[i][3].x + "," + calibMPoints[i][3].y + "\r\n");
+			}
 			
 			// close the filestream
 			filestream.close();
 		}
 		
 		
+		/**
+		 * Function to load calibration settings
+		 */
 		private function loadCalibrationSettings():void {
 
 			// reference the correct file and open it
@@ -1431,20 +1440,16 @@ package screens
 				
 			}
 			
-			// load picture 1 calibrations
-			calibStep[0][0] = values[0];
-			calibStep[0][1] = values[1];
-			calibStep[0][3] = values[2];
-			calibStep[0][4] = values[3];
-			
-			// load picture 2 calibrations
-			calibStep[1][0] = values[4];
-			calibStep[1][1] = values[5];
-			calibStep[1][3] = values[6];
-			calibStep[1][4] = values[7];
-			
 			// set an index to use
-			var val_index:int = 8;
+			var val_index:int = 0;
+			
+			// load picture calibrations
+			for (i = 0; i < 2; i++) {
+				for (var j:int = 0; j < 5; j++) {
+					if (j != 2)
+						calibStep[i][j] = values[val_index++];
+				}
+			}
 			
 			// load center point
 			for(i = 0; i < 2; i++) {
@@ -1452,15 +1457,9 @@ package screens
 				centerPoint[i] = new Point(tempvals[0], tempvals[1]);
 			}
 			
-			//			private var centerPoint:Array;		// 1D
-			//			private var calibXPoints:Array;		// 2D	[Picture index][X] ; 0 = left, 1 = right
-			//			private var calibYPoints:Array;		// 2D	[Picture index][X] ; 0 = top, 1 = bottom
-			//			private var calibMPoints:Array;		// 2D	[Picture index][X] ; 0 = top left, 1 = bottom left, 2 = bottom right, 3 = top right ; Makes a U
-			
-			
 			// load X points
 			for (i = 0; i < 2; i++) {
-				for (var j:int = 0; j < 2; j++) {
+				for (j = 0; j < 2; j++) {
 					tempvals = values[val_index++].split(",");
 					calibXPoints[i][j] = new Point(tempvals[0], tempvals[1]);
 				}
