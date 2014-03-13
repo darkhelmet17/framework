@@ -7,9 +7,12 @@ package screens
 	import flash.text.TextFormat;
 	
 	import feathers.controls.Button;
+	import feathers.controls.Label;
 	import feathers.controls.Screen;
 	import feathers.controls.TextArea;
 	import feathers.controls.TextInput;
+	import feathers.controls.text.TextFieldTextRenderer;
+	import feathers.text.BitmapFontTextFormat;
 	
 	import starling.events.Event;
 	

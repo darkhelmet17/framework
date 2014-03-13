@@ -41,7 +41,7 @@ package screens
 		private const BLUE:uint = 0x0000ff;
 		
 		// brightness threshold
-		private const BRIGHTNESS_THRESHOLD:uint = 2500000;
+		private const BRIGHTNESS_THRESHOLD:uint = 3000000;
 		
 		// box bound around mouse click area
 		private const BOUNDS:uint = 30;
@@ -99,10 +99,6 @@ package screens
 		
 		// text field to display instructions to user
 		private var textField:TextField;
-		
-		// hard-coded variables for pixel resolution
-		private var distance_away:Number = 1.5494; // in meters
-		private var distance:Number = 0.5; // in meters
 		
 		// Reflector center-point variables
 		private var left_shoulder:Point;
@@ -730,7 +726,7 @@ package screens
 					// Create second points
 					// p in the equation
 					var point1:Vector3D = createPoint(index, j);
-					var point2:Vector3D = createPoint(index, j);
+					var point2:Vector3D = createPoint(index-1, j);
 					
 					trace("1 point " + x + " pixels -> " + point1.x + "cms from center : Coordinte " + point1);
 					trace("2 point " + x + " pixels -> "  + point2.x + " cms from center : Coordinate " + point2);
@@ -787,13 +783,13 @@ package screens
 			var minT:Number;
 			
 			// Loop until 20m with steps of 1cm
-			for(var t:Number = 0; t < 20; t = t + 0.001) {
+			for(var t:Number = 0.001; t < 20; t = t + 0.001) {
 				var tempVect:Vector3D = rhs.clone();
 				
 				// Plug in values of t on the 
-				tempVect.x = lhs.x + tempVect.x * t;
-				tempVect.y = lhs.y + tempVect.y * t;
-				tempVect.z = lhs.z + tempVect.z * t;
+				tempVect.x = lhs.x - tempVect.x * t;
+				tempVect.y = lhs.y - tempVect.y * t;
+				tempVect.z = lhs.z - tempVect.z * t;
 				
 				if(tempVect.lengthSquared < minVect.lengthSquared) {
 					minVect = tempVect;
@@ -810,7 +806,11 @@ package screens
 			resultPoint.y = point.y - ray.y * minT;
 			resultPoint.z = point.z - ray.z * minT;
 			
-			return point;
+			trace("minT: " + minT);
+			trace("point: " + point);
+			trace("resultPoint: " + resultPoint);
+			
+			return resultPoint;
 		}
 		
 		
@@ -1004,18 +1004,6 @@ package screens
 				default:
 					break;
 			}
-		}
-		
-		
-		/**
-		 * Function to calculate pixel resolution based on mouse clicks
-		 */
-		private function calcRes(point1:Point, point2:Point):void {
-			var x:Number = Math.abs(point2.x - point1.x);
-			var y:Number = Math.abs(point2.y - point1.y);
-			
-			var res:Number = distance / x; // meters per pixel
-			textField.text = "resolution = " + (res * 1000) + " millimeters per pixel";
 		}
 		
 		
@@ -1334,18 +1322,21 @@ package screens
 			camera1.x = cam_coords[0];
 			camera1.y = cam_coords[1];
 			camera1.z = cam_coords[2];
+			trace("cam1z: " + camera1.z);
 			
 			// split camera 2 coordinates into separate values
 			cam_coords = lines[1].split(",");
 			camera2.x = cam_coords[0];
 			camera2.y = cam_coords[1];
 			camera2.z = cam_coords[2];
+			trace("cam2z: " + camera2.z);
 			
 			// split camera 3 coordinates into separate values
 			cam_coords = lines[2].split(",");
 			camera3.x = cam_coords[0];
 			camera3.y = cam_coords[1];
 			camera3.z = cam_coords[2];
+			trace("cam3z: " + camera3.z);
 			
 			// set calibrator values
 			calibrator.x = lines[3];
