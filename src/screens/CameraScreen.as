@@ -3,6 +3,7 @@ package screens
 	// import image encoder
 	import com.adobe.images.PNGEncoder;
 	
+	// import flash packages
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
@@ -12,15 +13,15 @@ package screens
 	import flash.filesystem.FileStream;
 	import flash.net.URLRequest;
 	import flash.net.sendToURL;
-	import flash.text.TextFormat;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
+	// import feathers packages
 	import feathers.controls.Button;
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.Screen;
-	import feathers.text.BitmapFontTextFormat;
 	
+	// import starling packages
 	import starling.display.Image;
 	import starling.events.Event;
 	
@@ -29,8 +30,7 @@ package screens
 	//		  	   Class Variables           //
 	//////////////////////////////////////////
 	
-	public class CameraScreen extends Screen 
-	{
+	public class CameraScreen extends Screen {
 		
 		// URLs for Camera 1
 		private const CAM_1_IMAGE_URL:String = "http://192.168.10.102/image/jpeg.cgi";
@@ -125,7 +125,7 @@ package screens
 		 * Constructor:
 		 * Initializes all variables and adds event listeners
 		 */
-		public function CameraScreen():void{
+		public function CameraScreen():void {
 			
 			// initialize Bitmap objects
 			bitmap_cam_1 = new Bitmap();
@@ -372,7 +372,7 @@ package screens
 		/**
 		 * Event handler for snapshot button.
 		 * 
-		 * Saves files in the directory C:/camera images/
+		 * Saves files in the directory C:/SAS Data/camera images/
 		 */
 		private function snapshotButtonClicked(event:starling.events.Event):void {
 			

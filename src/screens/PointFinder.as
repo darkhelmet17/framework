@@ -31,8 +31,8 @@ package screens
 	
 	public class PointFinder extends Screen {
 		
-		  ////////////////////////////
-		 ////      Constants    /////
+		////////////////////////////
+		////      Constants    /////
 		////////////////////////////
 		
 		// color constants
@@ -41,7 +41,7 @@ package screens
 		private const BLUE:uint = 0x0000ff;
 		
 		// brightness threshold
-		private const BRIGHTNESS_THRESHOLD:uint = 3000000;
+		private const BRIGHTNESS_THRESHOLD:uint = 2500000;
 		
 		// box bound around mouse click area
 		private const BOUNDS:uint = 30;
@@ -74,8 +74,8 @@ package screens
 		// centimeter conversion factor
 		private const CENTIMETERS:Number = 100;
 		
-		  ///////////////////////////
-		 //// Regular Variables ////
+		///////////////////////////
+		//// Regular Variables ////
 		///////////////////////////
 		
 		// Arrays to hold pictures
@@ -99,6 +99,10 @@ package screens
 		
 		// text field to display instructions to user
 		private var textField:TextField;
+		
+		// hard-coded variables for pixel resolution
+		private var distance_away:Number = 1.5494; // in meters
+		private var distance:Number = 0.5; // in meters
 		
 		// Reflector center-point variables
 		private var left_shoulder:Point;
@@ -305,7 +309,7 @@ package screens
 								}
 							}	
 						}
-						// not calibrating
+							// not calibrating
 						else {
 							// If the mouse moved < 10 then do not change the picture AKA user was scrolling the container
 							if(Math.abs(t.globalX - touchBeginX) < 10) {
@@ -323,14 +327,14 @@ package screens
 										/*
 										// If the user hasn't calibrated, then we're going to force them to
 										if(centerPoint[index] == 0 || !centerPoint[index]) {
-											trace("CALIB");
-											isCalibrating = true;
-											textField.text = "Beginning calibration, please select the center";
-											setCenter(t, index);
+										trace("CALIB");
+										isCalibrating = true;
+										textField.text = "Beginning calibration, please select the center";
+										setCenter(t, index);
 										}
 										else {*/ 
-											//trace("human assist called");
-											humanAssist(t);
+										//trace("human assist called");
+										humanAssist(t);
 										//}
 										
 										// Display saved center poitns
@@ -683,7 +687,7 @@ package screens
 			// Store all the values of the points
 			var p:Point = new Point(x, y);
 			bodyPoints[index][bodyIndex] = p;
-			trace("POINT " + bodyIndex + " " + bodyPoints[index][bodyIndex].x + " " + bodyPoints[index][bodyIndex].y);
+			trace("BODYPOINT " + bodyIndex + " " + bodyPoints[index][bodyIndex].x + " " + bodyPoints[index][bodyIndex].y);
 			bodyIndex++;
 			
 			// Update image
@@ -696,7 +700,7 @@ package screens
 			// -1 b/c index is 0 to numthumnails - 1
 			
 			if(bodyIndex == NUM_BODY_POINTS && index == (numThumbNails - 1)) {
-				trace("GOING INTO RAY CALC");
+				// trace("GOING INTO RAY CALC");
 				rayCalc();
 			}
 			
@@ -725,13 +729,15 @@ package screens
 					
 					// Create second points
 					// p in the equation
-					var point1:Vector3D = createPoint(index, j);
-					var point2:Vector3D = createPoint(index-1, j);
+					// TODO: HMM?
+					var point1:Vector3D = createPoint(i, j);
+					var point2:Vector3D = createPoint(i + 1, j);
+					//var point3:Vector3D = createPoint(i, j);
 					
-					trace("1 point " + x + " pixels -> " + point1.x + "cms from center : Coordinte " + point1);
-					trace("2 point " + x + " pixels -> "  + point2.x + " cms from center : Coordinate " + point2);
+					trace("1 point pixels -> " + point1.x + " " + point1.y + "cms from center : Coordinte " + point1);
+					trace("2 point pixels -> "  + point2.x + " " + point2.y + " cms from center : Coordinate " + point2);
 					
-					// Create first rays
+					// Create first ray
 					// r in the equation
 					var magnitude:Number = calcMagnatude(point1, camera1);
 					var r1:Vector3D = new Vector3D();
@@ -742,21 +748,30 @@ package screens
 					var r2:Vector3D = new Vector3D();
 					r2 = createRay(point2, camera2, magnitude);
 					
+					// Create 3rd ray
+					//magnitude = calcMagnatude(point3, camera3);
+					//var r3:Vector3D = new Vector3D();
+					//r3 = createRay(point3, camera3, magnitude);
+					
 					// Do maths
 					// r1 + v1t = r2 + v2t == r1 - r2 = v2t - v1t == r1 - r2 = (v2 - v1)t 
 					// lhs = r1 - r2
 					// rhs = v2 - v1
 					var lhs:Vector3D = camera1.subtract(camera2);
+					//lhs = lhs.subtract(camera3);
 					var rhs:Vector3D = r2.subtract(r1);
+					//rhs = rhs.subtract(r2)
 					
+					/*
 					trace("p1 " + point1);
 					trace("p2 " + point2);
 					trace("r1 " + r1);
 					trace("r2 " + r2);
 					trace("lhs " + lhs);
 					trace("rhs " + rhs);
+					*/
 					
-					var pointOfClosestApproach:Vector3D = findClosestApproach(rhs, lhs, r1, point1);
+					var pointOfClosestApproach:Vector3D = findClosestApproach(rhs, lhs, r1, camera1);
 					
 					trace("Resulting point = " + pointOfClosestApproach);
 					
@@ -767,7 +782,6 @@ package screens
 				}
 			}	
 			savePoints();
-			trace("Finished");
 		}		
 		
 		
@@ -775,6 +789,30 @@ package screens
 		 * Ray and point MUST corespond to the same equation!
 		 */
 		private function findClosestApproach(rhs:Vector3D, lhs:Vector3D, ray:Vector3D, point:Vector3D):Vector3D {
+			
+			// TEMP
+			
+			
+			trace(" " + rhs + " " + lhs + " " + ray + " " + point);
+			
+			/*
+			lhs.x = -1;
+			lhs.y = 0.07;
+			lhs.z = 0;
+			
+			rhs.x = 0.4757216;
+			rhs.y = -0.018335794;
+			rhs.z = 0.0596985;
+			
+			ray.x = -0.12330229;
+			ray.y = -0.1262128;
+			ray.z = -0.98431925;
+			
+			point.x = 0;
+			point.y = -0.26;
+			point.z = -2;
+			*/
+			
 			// Sentiel values to be used on the first compare, values don't matter as long as they're large values
 			// In this case 100m for all directions
 			var minVect:Vector3D = new Vector3D(100,100,100);
@@ -783,13 +821,13 @@ package screens
 			var minT:Number;
 			
 			// Loop until 20m with steps of 1cm
-			for(var t:Number = 0.001; t < 20; t = t + 0.001) {
+			for(var t:Number = 0; t < 20; t = t + 0.001) {
 				var tempVect:Vector3D = rhs.clone();
 				
 				// Plug in values of t on the 
-				tempVect.x = lhs.x - tempVect.x * t;
-				tempVect.y = lhs.y - tempVect.y * t;
-				tempVect.z = lhs.z - tempVect.z * t;
+				tempVect.x = lhs.x + tempVect.x * t;
+				tempVect.y = lhs.y + tempVect.y * t;
+				tempVect.z = lhs.z + tempVect.z * t;
 				
 				if(tempVect.lengthSquared < minVect.lengthSquared) {
 					minVect = tempVect;
@@ -806,9 +844,7 @@ package screens
 			resultPoint.y = point.y - ray.y * minT;
 			resultPoint.z = point.z - ray.z * minT;
 			
-			trace("minT: " + minT);
-			trace("point: " + point);
-			trace("resultPoint: " + resultPoint);
+			trace("Z Distance away " + (ray.z * minT) + " at " + minT);
 			
 			return resultPoint;
 		}
@@ -817,9 +853,9 @@ package screens
 		private function createRay(point:Vector3D, camera:Vector3D, magnitude:Number):Vector3D {
 			var ray:Vector3D = new Vector3D();
 			
-			ray.x = (point.x - camera.x) * (1 / magnitude);
-			ray.y = (point.y - camera.y) * (1 / magnitude);
-			ray.z = (point.z - camera.z) * (1 / magnitude);
+			ray.x = (camera.x - point.x) * (1 / magnitude);
+			ray.y = (camera.y - point.y) * (1 / magnitude);
+			ray.z = (camera.z - point.z) * (1 / magnitude);
 			
 			return ray;
 		}
@@ -832,8 +868,10 @@ package screens
 			// Create first pont 
 			var point:Vector3D = new Vector3D();
 			
-			point.x = (centerX - bodyPoints[index][j].x) * findM(centerX - bodyPoints[index][j].x, index, "x");
-			point.y = (centerY - bodyPoints[index][j].y) * findM(centerY - bodyPoints[index][j].y, index, "y");
+			var m:Number = findM(centerX - bodyPoints[index][j].x, index, "x");
+			point.x = (centerX - bodyPoints[index][j].x) * m;
+			m = findM(centerY - bodyPoints[index][j].y, index, "y")
+			point.y = (centerY - bodyPoints[index][j].y) * m;
 			point.z = 0;
 			
 			return point;
@@ -841,12 +879,13 @@ package screens
 		
 		
 		private function calcMagnatude(point:Vector3D, camera:Vector3D):Number {
+			
 			var mx:Number = Math.pow(point.x - camera.x, 2);
 			var my:Number = Math.pow(point.y - camera.y, 2);
 			var mz:Number = Math.pow(point.z - camera.z, 2);
 			
 			var magnitude:Number = Math.sqrt(mx + my + mz);
-			trace("Mag " + magnitude + " " + mx + " " + my + " " +mz);
+			trace("Mag " + magnitude + " " + mx + " " + my + " " +mz + " " + point + " " + camera);
 			
 			return magnitude;
 		}
@@ -861,15 +900,15 @@ package screens
 			// 4 = bottom
 			if(direction == "x") {
 				if(point > centerPoint[index].x)
-					return calibStep[index][0];
+					return Math.abs(calibStep[index][0]);
 				else
-					return calibStep[index][1];
+					return Math.abs(calibStep[index][1]);
 			}
 			else if(direction == "y") {
 				if(point > centerPoint[index].y)
-					return calibStep[index][2];
+					return Math.abs(calibStep[index][2]);
 				else
-					return calibStep[index][4];
+					return Math.abs(calibStep[index][4]);
 			}
 			else
 				trace("Invalid findM() direction");	
@@ -1004,6 +1043,18 @@ package screens
 				default:
 					break;
 			}
+		}
+		
+		
+		/**
+		 * Function to calculate pixel resolution based on mouse clicks
+		 */
+		private function calcRes(point1:Point, point2:Point):void {
+			var x:Number = Math.abs(point2.x - point1.x);
+			var y:Number = Math.abs(point2.y - point1.y);
+			
+			var res:Number = distance / x; // meters per pixel
+			textField.text = "resolution = " + (res * 1000) + " millimeters per pixel";
 		}
 		
 		
@@ -1177,17 +1228,17 @@ package screens
 			// 3 = top
 			// 4 = bottom
 			var vStep:Number = (centerPoint[index].x - calibXPoints[index][0].x) / calibrator.x;
-			calibStep[index][0] = 1 / vStep;
+			calibStep[index][0] = Math.abs(1 / vStep);
 			vStep = (centerPoint[index].x - calibXPoints[index][1].x) / calibrator.x;
-			calibStep[index][1] = 1 / vStep;
+			calibStep[index][1] = Math.abs(1 / vStep);
 			
 			// trace("vStep " + calibStep[index][0] + " " + calibStep[index][1]);
 			
 			// Top + bottom y distances / 2
 			var hStep:Number = (centerPoint[index].y - calibYPoints[index][0].y) / calibrator.y;
-			calibStep[index][3] = 1 / hStep;
+			calibStep[index][3] = Math.abs(1 / hStep);
 			hStep = (centerPoint[index].y - calibYPoints[index][1].y) / calibrator.y;
-			calibStep[index][4] = 1 / hStep;
+			calibStep[index][4] = Math.abs(1 / hStep);
 			
 			// trace("hStep " + calibStep[index][3] + " " + calibStep[index][4]);
 			
@@ -1317,26 +1368,26 @@ package screens
 			// get each line of the file
 			var lines:Array = SettingsScreen.readSettingsFile();
 			
+			if(lines == null)
+				return;
+			
 			// split camera 1 coordinates into separate values
 			var cam_coords:Array = lines[0].split(",");
 			camera1.x = cam_coords[0];
 			camera1.y = cam_coords[1];
 			camera1.z = cam_coords[2];
-			trace("cam1z: " + camera1.z);
 			
 			// split camera 2 coordinates into separate values
 			cam_coords = lines[1].split(",");
 			camera2.x = cam_coords[0];
 			camera2.y = cam_coords[1];
 			camera2.z = cam_coords[2];
-			trace("cam2z: " + camera2.z);
 			
 			// split camera 3 coordinates into separate values
 			cam_coords = lines[2].split(",");
 			camera3.x = cam_coords[0];
 			camera3.y = cam_coords[1];
 			camera3.z = cam_coords[2];
-			trace("cam3z: " + camera3.z);
 			
 			// set calibrator values
 			calibrator.x = lines[3];
@@ -1376,10 +1427,10 @@ package screens
 				filestream.writeUTFBytes("cam" + (i+1) + "_bottom_res:" + calibStep[i][4] + "\r\n");
 			}
 			
-//			private var centerPoint:Array;		// 1D
-//			private var calibXPoints:Array;		// 2D	[Picture index][X] ; 0 = left, 1 = right
-//			private var calibYPoints:Array;		// 2D	[Picture index][X] ; 0 = top, 1 = bottom
-//			private var calibMPoints:Array;		// 2D	[Picture index][X] ; 0 = top left, 1 = bottom left, 2 = bottom right, 3 = top right ; Makes a U
+			//			private var centerPoint:Array;		// 1D
+			//			private var calibXPoints:Array;		// 2D	[Picture index][X] ; 0 = left, 1 = right
+			//			private var calibYPoints:Array;		// 2D	[Picture index][X] ; 0 = top, 1 = bottom
+			//			private var calibMPoints:Array;		// 2D	[Picture index][X] ; 0 = top left, 1 = bottom left, 2 = bottom right, 3 = top right ; Makes a U
 			
 			// write center points
 			filestream.writeUTFBytes("cam1_center:" + centerPoint[0].x + "," + centerPoint[0].y + "\r\n");
@@ -1413,10 +1464,14 @@ package screens
 		
 		
 		private function loadCalibrationSettings():void {
-
-			// reference the correct file and open it
-			file = File.desktopDirectory.resolvePath(CALIB_PATH);
-			filestream.open(file, FileMode.READ);
+			
+			try {
+				
+				// reference the correct file and open it
+				file = File.desktopDirectory.resolvePath(CALIB_PATH);
+				filestream.open(file, FileMode.READ);
+			}
+			catch(e:Error) { return; }
 			
 			// get every line of the file
 			var lines:Array = filestream.readUTFBytes(filestream.bytesAvailable).split("\r\n");

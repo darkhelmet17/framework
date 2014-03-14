@@ -21,7 +21,7 @@ package screens {
 		
 		
 		// runs whenever the class is first initialized. must be inherited from the Screen Class.
-		override protected function initialize():void{
+		override protected function initialize():void {
 			
 			buildContainer();
 			loadTitles();
@@ -35,6 +35,7 @@ package screens {
 			titleLoader.source = Texture.fromEmbeddedAsset(TitleImage); // the name of the image data. Texture is a starling class
 			titleLoader.width = scrollContainer.width;
 			titleLoader.height = scrollContainer.height-50;
+			
 			scrollContainer.addChild(titleLoader); // add to scroll container.
 			
 			
@@ -60,7 +61,7 @@ package screens {
 		
 		
 		// position and size things accurately.
-		override protected function draw():void{
+		override protected function draw():void {
 			titleLoader.validate(); // enforce current numbers to use them
 			//titleLoader.width = actualWidth; // actualWidth is a property of the feathers screen class 
 			titleLoader.width =  actualWidth;

@@ -1,6 +1,12 @@
 package
 {
+	
 	// import Away3D packages
+	import away3d.containers.View3D;
+	import away3d.core.managers.Stage3DManager;
+	import away3d.core.managers.Stage3DProxy;
+	
+	// import flash packages
 	import flash.display.Bitmap;
 	import flash.display.NativeWindow;
 	import flash.display.NativeWindowInitOptions;
@@ -13,20 +19,20 @@ package
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
-	import away3d.containers.View3D;
-	import away3d.core.managers.Stage3DManager;
-	import away3d.core.managers.Stage3DProxy;
-	
+	// import Main class
 	import star.Main;
 	
+	// import Starling package
 	import starling.core.Starling;
 	
 	// set size and background of window
 	[SWF(frameRate = "60", backgroundColor = "0x000000", height="800", width="1200")]
 	
+	
 	////// BEGIN CLASS Feathers_Test2 //////
-	public class Feathers_Test2 extends Sprite
-	{
+	
+	
+	public class Feathers_Test2 extends Sprite {
 		  ////////////////////////
 		 // private variables  //
 		////////////////////////
@@ -91,8 +97,12 @@ package
 			splash = new Splash();
 			splash.addEventListener(Event.ENTER_FRAME, onAddedToStage);
 			addChild(splash);
-			splash.width = stage.stageWidth;
-			splash.height = stage.stageHeight;
+			
+			// set size components of the splash screen
+			splash.width = stage.stageWidth / 3;
+			splash.height = stage.stageHeight / 3;
+			splash.x = stage.stageWidth / 2.5;
+			splash.y = stage.stageHeight / 3.5;
 			
 			// add event listeners
 			loaderInfo.addEventListener(Event.COMPLETE, onLoadComplete);
@@ -136,8 +146,7 @@ package
 		/**
 		 * onLoadComplete(): event handler called once everything is finished loading.
 		 */
-		protected function onLoadComplete(event:Event):void
-		{
+		protected function onLoadComplete(event:Event):void {
 			// Set up Starlring
 			starling.start();
 			
@@ -160,8 +169,7 @@ package
 			viewPort.height = stage.stageHeight;
 		}
 		
-		protected function onStageResize(event:Event):void
-		{
+		protected function onStageResize(event:Event):void {
 			// set new width/height of starling stage
 			starling.stage.stageWidth = stage.stageWidth;
 			starling.stage.stageHeight = stage.stageHeight;
@@ -177,18 +185,14 @@ package
 		
 		
 		//Call this once your first Starling view has rendered
-		public function removeSplash(event:TimerEvent):void
-		{
-			if (splash && splash.parent)
-			{
+		public function removeSplash(event:TimerEvent):void {
+			if (splash && splash.parent) {
 				removeChild(splash);
 			}
 		}
 		
-		private function onAddedToStage(event:Event):void
-		{
+		private function onAddedToStage(event:Event):void {
 			splash.removeEventListener(Event.ENTER_FRAME, onAddedToStage);
-			
 			
 			var timer:Timer = new Timer(1500);
 			timer.addEventListener(TimerEvent.TIMER, removeSplash); // will call callback()

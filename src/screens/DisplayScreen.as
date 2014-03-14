@@ -334,13 +334,13 @@ package screens
 			//for(var i:Number=0; i < numPoints-1; i++){						// iffy with the -1 thing
 			//For every other two points draw a line between them
 			
-			for(var i:int = 0; i < numPoints; i++){
+			for(var i:int = 0; i < numPoints; i++) {
 				
 				// Extract point data for the next 2 points that will be connected
 				var t:Array = arrayData[i].split(",");
-				var startPoint:Vector3D = new Vector3D(t[0],t[1],t[2]);
+				var startPoint:Vector3D = new Vector3D(t[0]*2,t[1]*2,t[2]*2);
 				var g:Array = arrayData[i+1].split(",");
-				var endPoint:Vector3D = new Vector3D(g[0],g[1],g[2]);
+				var endPoint:Vector3D = new Vector3D(g[0]*2,g[1]*2,g[2]*2);
 				
 				// find midpoint through vector substraction. 
 				midPointArray[count] = new Vector3D((endPoint.x+startPoint.x)*0.5, (endPoint.y+startPoint.y)*0.5, (endPoint.z+startPoint.z)*0.5);
@@ -422,11 +422,11 @@ package screens
 		{
 			// write each value from file into array of values
 			for(var i:int = 0; i < arrayData.length-1; i++){
-				var point:* = new Mesh(new SphereGeometry(10,50,50));
+				var point:* = new Mesh(new SphereGeometry(5,50,50));
 				var tempvals:Array = arrayData[i].split(",");
-				point.x = tempvals[0];
-				point.y = tempvals[1];
-				point.z = tempvals[2];
+				point.x = tempvals[0]*2;
+				point.y = tempvals[1]*2;
+				point.z = tempvals[2]*2;
 				
 				point.mouseEnabled = true; 
 				
@@ -476,8 +476,9 @@ package screens
 			// change this to adjust marker diameters
 			var reflectorDia:* = 10; 
 			
+			
 			// GREEN MARKER 1
-			var markerGreen:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
+			var markerGreen:* = new Mesh(new SphereGeometry(5,50,50));
 			markerGreen.x = 0;
 			markerGreen.y = 0;
 			markerGreen.z = 0;
@@ -490,7 +491,7 @@ package screens
 			markerGreen.addEventListener(MouseEvent3D.MOUSE_DOWN, objectClick);
 			
 			// add to scene
-			away3dView.scene.addChild(markerGreen);
+			//away3dView.scene.addChild(markerGreen);
 			
 			// RED MARKER 2
 			var markerRed:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
@@ -543,7 +544,7 @@ package screens
 			away3dView.scene.addChild(markerLBlue);		
 			
 			// WHITE MARKER 6
-			var markerWhite:* = new Mesh(new SphereGeometry(10,50,50));
+			var markerWhite:* = new Mesh(new SphereGeometry(reflectorDia,50,50));
 			markerWhite.x = 0;
 			markerWhite.y = 500;
 			markerWhite.z = 0;
@@ -590,10 +591,10 @@ package screens
 			
 			
 			// try a planeGeometry Instead	
-			picturePlane = new Mesh(new PlaneGeometry(256,1024,1,1,false,true),material);
+			picturePlane = new Mesh(new PlaneGeometry(128,512,1,1,false,true),material);
 			
 			picturePlane.x = 0;
-			picturePlane.y = 0;
+			picturePlane.y = -150;
 			picturePlane.z = 0;
 			
 			//away3dView.scene.addChild(blockMesh);
@@ -630,7 +631,7 @@ package screens
 			var cylinder:* = new Mesh(new CylinderGeometry(500,600,10,50));
 			//cylinder.pivotX = cylinde; // centers
 			cylinder.x = 0; // in the middle
-			cylinder.y = -500; // trail and error
+			cylinder.y = -405; // trail and error
 			cylinder.z = 0;
 			// floor.y = -50;
 			//
